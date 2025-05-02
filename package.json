@@ -1,6 +1,6 @@
 {
   "name": "@d3p1/img-strip-effect",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "An image strip effect to improve my JS skills",
   "private": true,
   "type": "module",
