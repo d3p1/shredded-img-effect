@@ -1,3 +1,10 @@
+## [1.0.1](https://github.com/d3p1/shredded-img-effect/compare/v1.0.0...v1.0.1) (2025-05-03)
+
+
+### Bug Fixes
+
+* adjust project name [[#1](https://github.com/d3p1/shredded-img-effect/issues/1)] ([fa6e258](https://github.com/d3p1/shredded-img-effect/commit/fa6e258db9c07efddc407acf7a7b1a29f6899c7c))
+
 # 1.0.0 (2025-05-02)
 
 
