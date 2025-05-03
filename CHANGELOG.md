@@ -1,3 +1,10 @@
+## [1.0.2](https://github.com/d3p1/shredded-img-effect/compare/v1.0.1...v1.0.2) (2025-05-03)
+
+
+### Bug Fixes
+
+* solve #width property is never read error [[#1](https://github.com/d3p1/shredded-img-effect/issues/1)] ([ec9648b](https://github.com/d3p1/shredded-img-effect/commit/ec9648ba9aea150e2aa60f68bf2eb19d9729aeac))
+
 ## [1.0.1](https://github.com/d3p1/shredded-img-effect/compare/v1.0.0...v1.0.1) (2025-05-03)
 
 
