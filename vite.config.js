@@ -2,7 +2,7 @@ import tailwindcss from '@tailwindcss/vite'
 
 export default {
   root: 'src/',
-  base: '/img-strip-effect/',
+  base: '/shredded-img-effect/',
   server: {
     host: true,
   },
@@ -11,7 +11,5 @@ export default {
     emptyOutDir: true,
     sourcemap: true,
   },
-  plugins: [
-    tailwindcss(),
-  ]
+  plugins: [tailwindcss()],
 }

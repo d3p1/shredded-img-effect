@@ -1,7 +1,7 @@
 {
-  "name": "@d3p1/img-strip-effect",
+  "name": "@d3p1/shredded-img-effect",
   "version": "0.0.0",
-  "description": "An image strip effect to improve my JS skills",
+  "description": "A shredded image effect to improve my JS skills",
   "private": true,
   "type": "module",
   "scripts": {
@@ -17,7 +17,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/d3p1/img-strip-effect.git"
+    "url": "git+https://github.com/d3p1/shredded-img-effect.git"
   },
   "keywords": [
     "javascript",
@@ -29,9 +29,9 @@
   "author": "C. M. de Picciotto <d3p1@d3p1.dev> (https://d3p1.dev/)",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/d3p1/img-strip-effect/issues"
+    "url": "https://github.com/d3p1/shredded-img-effect/issues"
   },
-  "homepage": "https://github.com/d3p1/img-strip-effect#readme",
+  "homepage": "https://github.com/d3p1/shredded-img-effect#readme",
   "devDependencies": {
     "@commitlint/cli": "^19.4.0",
     "@d3p1/commitlint-config": "^1.0.1",
