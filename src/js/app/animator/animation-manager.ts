@@ -9,7 +9,17 @@ export default class AnimationManager {
   /**
    * @type {Array<{ref: ShreddedImage} & object>[]}
    */
-  #keyframes: Keyframe<ShreddedImage>[] = []
+  keyframes: Keyframe<ShreddedImage>[] = []
+
+  /**
+   * @type {number}
+   */
+  currentKeyframeIndex: number = 0
+
+  /**
+   * @type {number}
+   */
+  nextKeyframeIndex: number = 0
 
   /**
    * @type {(t: number) => number}
@@ -44,20 +54,22 @@ export default class AnimationManager {
    * @todo    Improve how property types are managed
    */
   play(time: number = 0): void {
-    const currentKeyframeIndex =
-      Math.floor(time / this.#duration) % this.#keyframes.length
-    const nextKeyframeIndex =
-      (currentKeyframeIndex + 1) % this.#keyframes.length
-    const currentKeyframe = this.#keyframes[currentKeyframeIndex]
-    const nextKeyframe = this.#keyframes[nextKeyframeIndex]
+    this.currentKeyframeIndex =
+      Math.floor(time / this.#duration) % this.keyframes.length
+    this.nextKeyframeIndex =
+      (this.currentKeyframeIndex + 1) % this.keyframes.length
 
+    const currentKeyframe = this.keyframes[this.currentKeyframeIndex]
+    const nextKeyframe = this.keyframes[this.nextKeyframeIndex]
     const t = this.#easing((time % this.#duration) / this.#duration)
+
     for (let i = 0; i < currentKeyframe.length; i++) {
       const {ref, ...properties} = currentKeyframe[i]
       for (const property in properties) {
         const startValue = currentKeyframe[i][property as keyof ShreddedImage]
         const endValue = nextKeyframe[i][property as keyof ShreddedImage]
-        if (startValue && endValue) {
+
+        if (startValue !== undefined && endValue !== undefined) {
           ref[property as keyof ShreddedImage] = Mathy.lerp(
             startValue,
             endValue,
@@ -66,8 +78,6 @@ export default class AnimationManager {
         }
       }
     }
-
-    requestAnimationFrame(this.play.bind(this))
   }
 
   /**
@@ -77,6 +87,6 @@ export default class AnimationManager {
    * @returns {void}
    */
   add(keyframe: Keyframe<ShreddedImage>): void {
-    this.#keyframes.push(keyframe)
+    this.keyframes.push(keyframe)
   }
 }

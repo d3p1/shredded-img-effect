@@ -2,11 +2,17 @@
  * @description App
  * @author      C. M. de Picciotto <d3p1@d3p1.dev> (https://d3p1.dev/)
  */
+import AnimationManager from './app/animator/animation-manager.ts'
+import AbstractShreddedImg from './app/core/abstract-shredded-img.ts'
 import VerticalShreddedImg from './app/core/vertical-shredded-img.ts'
-import HorizontalShreddedImg from './app/core/horizontal-shredded-img.ts'
 import cheetahImg from '../media/images/cheetah.png'
 
 class App {
+  /**
+   * @type {AnimationManager}
+   */
+  #animationManager: AnimationManager
+
   /**
    * @type {CanvasRenderingContext2D}
    */
@@ -20,19 +26,20 @@ class App {
   /**
    * @type {VerticalShreddedImg | null}
    */
-  #verticalShreddedImg: VerticalShreddedImg | null = null
+  #evenVerticalShreddedImg: VerticalShreddedImg | null = null
 
   /**
-   * @type {HorizontalShreddedImg | null}
+   * @type {VerticalShreddedImg | null}
    */
-  #horizontalShreddedImg: HorizontalShreddedImg | null = null
+  #oddVerticalShreddedImg: VerticalShreddedImg | null = null
 
   /**
    * Constructor
    */
   constructor() {
     this.#initCanvas()
-    this.#initShreddedImg()
+    this.#initAnimationManager()
+    this.#initVerticalShreddedImgs()
 
     this.#animate()
   }
@@ -40,26 +47,32 @@ class App {
   /**
    * Animate
    *
+   * @param   {number} t
    * @returns {void}
    */
-  #animate(): void {
+  #animate(t: number = 0): void {
     this.#clear()
-    this.#draw()
+    this.#draw(t)
     requestAnimationFrame(this.#animate.bind(this))
   }
 
   /**
    * Draw
    *
+   * @param   {number} t
    * @returns {void}
    */
-  #draw(): void {
-    if (this.#verticalShreddedImg) {
-      this.#verticalShreddedImg.draw(this.#context)
+  #draw(t: number): void {
+    if (this.#animationManager.keyframes.length) {
+      this.#animationManager.play(t)
     }
 
-    if (this.#horizontalShreddedImg) {
-      this.#horizontalShreddedImg.draw(this.#context)
+    if (this.#evenVerticalShreddedImg) {
+      this.#evenVerticalShreddedImg.draw(this.#context)
+    }
+
+    if (this.#oddVerticalShreddedImg) {
+      this.#oddVerticalShreddedImg.draw(this.#context)
     }
   }
 
@@ -73,11 +86,11 @@ class App {
   }
 
   /**
-   * Init image
+   * Init vertical shredded images
    *
    * @returns {void}
    */
-  #initShreddedImg(): void {
+  #initVerticalShreddedImgs(): void {
     const img = new Image()
     img.src = cheetahImg
 
@@ -85,27 +98,110 @@ class App {
       const width = this.#canvas.width * 0.2
       const ar = img.width / img.height
       const height = width / ar
+      const stripSize = Math.ceil(width * 0.01)
+      const spread = 2
 
-      this.#verticalShreddedImg = new VerticalShreddedImg(
+      this.#evenVerticalShreddedImg = this.#createVerticalShreddedImg(
         img,
         width,
         height,
-        width * 0.1,
-        1,
+        true,
+        stripSize,
         0,
         0,
+        spread,
       )
-
-      this.#horizontalShreddedImg = new HorizontalShreddedImg(
+      this.#oddVerticalShreddedImg = this.#createVerticalShreddedImg(
         img,
         width,
         height,
-        height * 0.1,
-        1,
+        false,
+        stripSize,
+        stripSize,
         0,
-        500,
+        spread,
       )
+
+      this.#animationManager.add([
+        {
+          ref: this.#oddVerticalShreddedImg,
+          y: 0,
+          x: this.#oddVerticalShreddedImg.x,
+          spread: spread,
+        },
+        {
+          ref: this.#evenVerticalShreddedImg,
+          y: 0,
+          x: 0,
+          spread: spread,
+        },
+      ])
+      this.#animationManager.add([
+        {
+          ref: this.#oddVerticalShreddedImg,
+          y: 0,
+          x: this.#oddVerticalShreddedImg.x,
+          spread: spread,
+        },
+        {
+          ref: this.#evenVerticalShreddedImg,
+          y: 0,
+          x: 0,
+          spread: spread,
+        },
+      ])
+      this.#animationManager.add([
+        {
+          ref: this.#oddVerticalShreddedImg,
+          y: this.#canvas.height - height,
+          x: this.#oddVerticalShreddedImg.x,
+          spread: spread,
+        },
+        {
+          ref: this.#evenVerticalShreddedImg,
+          y: 0,
+          x: 0,
+          spread: spread,
+        },
+      ])
+      this.#animationManager.add([
+        {
+          ref: this.#oddVerticalShreddedImg,
+          y: this.#canvas.height - height,
+          x: 0,
+          spread: 1,
+        },
+        {
+          ref: this.#evenVerticalShreddedImg,
+          y: 0,
+          x: 0,
+          spread: 1,
+        },
+      ])
+      this.#animationManager.add([
+        {
+          ref: this.#oddVerticalShreddedImg,
+          y: this.#canvas.height - height,
+          x: 0,
+          spread: 1,
+        },
+        {
+          ref: this.#evenVerticalShreddedImg,
+          y: 0,
+          x: 0,
+          spread: 1,
+        },
+      ])
     }
+  }
+
+  /**
+   * Init animation manager
+   *
+   * @returns {void}
+   */
+  #initAnimationManager(): void {
+    this.#animationManager = new AnimationManager(2000, (t) => t ** 2)
   }
 
   /**
@@ -120,6 +216,41 @@ class App {
     this.#canvas.width = window.innerWidth
     this.#canvas.height = window.innerHeight
     document.body.appendChild(this.#canvas)
+  }
+
+  /**
+   * Create vertical shredded image
+   *
+   * @param   {HTMLImageElement} img
+   * @param   {number}           width
+   * @param   {number}           height
+   * @param   {boolean}          isEven
+   * @param   {number}           stripSize
+   * @param   {number}           x
+   * @param   {number}           y
+   * @param   {number}           spread
+   * @returns {AbstractShreddedImg}
+   */
+  #createVerticalShreddedImg(
+    img: HTMLImageElement,
+    width: number,
+    height: number,
+    isEven: boolean = true,
+    stripSize: number,
+    x: number = 0,
+    y: number = 0,
+    spread: number = 2,
+  ): AbstractShreddedImg {
+    return new VerticalShreddedImg(
+      img,
+      width,
+      height,
+      stripSize,
+      spread,
+      x,
+      y,
+      isEven,
+    )
   }
 }
 new App()
