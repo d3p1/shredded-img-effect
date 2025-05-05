@@ -2,17 +2,9 @@
  * @description Shredded image abstract implementation
  * @author      C. M. de Picciotto <d3p1@d3p1.dev> (https://d3p1.dev/)
  */
-export default abstract class AbstractShreddedImg {
-  /**
-   * @type {HTMLCanvasElement}
-   */
-  img: HTMLCanvasElement
+import {ShreddedImage} from '../../types'
 
-  /**
-   * @type {HTMLCanvasElement[]}
-   */
-  strips: HTMLCanvasElement[]
-
+export default abstract class AbstractShreddedImg implements ShreddedImage {
   /**
    * @type {number}
    */
@@ -32,6 +24,16 @@ export default abstract class AbstractShreddedImg {
    * @type {number}
    */
   y: number
+
+  /**
+   * @type {HTMLCanvasElement}
+   */
+  protected _img: HTMLCanvasElement
+
+  /**
+   * @type {HTMLCanvasElement[]}
+   */
+  protected _strips: HTMLCanvasElement[]
 
   /**
    * Constructor
@@ -69,8 +71,8 @@ export default abstract class AbstractShreddedImg {
    * @returns {void}
    */
   draw(context: CanvasRenderingContext2D): void {
-    for (let i = 0; i < this.strips.length; i++) {
-      const strip = this.strips[i]
+    for (let i = 0; i < this._strips.length; i++) {
+      const strip = this._strips[i]
       this._drawStrip(context, strip, i)
     }
   }
@@ -99,15 +101,15 @@ export default abstract class AbstractShreddedImg {
    * @note    By default, strips are being generated as vertical strips
    */
   protected _initStrips(): void {
-    this.strips = []
-    for (let x = 0; x < this.img.width; x += this.stripSize) {
+    this._strips = []
+    for (let x = 0; x < this._img.width; x += this.stripSize) {
       const strip = document.createElement('canvas')
       strip.width = this.stripSize
-      strip.height = this.img.height
+      strip.height = this._img.height
 
       const stripContext = strip.getContext('2d') as CanvasRenderingContext2D
       stripContext.drawImage(
-        this.img,
+        this._img,
         x,
         0,
         strip.width,
@@ -118,7 +120,7 @@ export default abstract class AbstractShreddedImg {
         strip.height,
       )
 
-      this.strips.push(strip)
+      this._strips.push(strip)
     }
   }
 
@@ -136,10 +138,10 @@ export default abstract class AbstractShreddedImg {
     width: number,
     height: number,
   ): void {
-    this.img = document.createElement('canvas')
-    this.img.width = width
-    this.img.height = height
-    const context = this.img.getContext('2d') as CanvasRenderingContext2D
+    this._img = document.createElement('canvas')
+    this._img.width = width
+    this._img.height = height
+    const context = this._img.getContext('2d') as CanvasRenderingContext2D
     context.drawImage(img, 0, 0, width, height)
   }
 }
