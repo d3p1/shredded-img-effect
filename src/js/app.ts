@@ -2,12 +2,25 @@
  * @description App
  * @author      C. M. de Picciotto <d3p1@d3p1.dev> (https://d3p1.dev/)
  */
-import AnimationManager from './app/animator/animation-manager.ts'
-import AbstractShreddedImg from './app/core/abstract-shredded-img.ts'
-import VerticalShreddedImg from './app/core/vertical-shredded-img.ts'
+import AnimationManager from './app/animator/shredded-img-animation-manager.ts'
+import ShreddedImgManager from './app/core/shredded-img-manager.ts'
 import cheetahImg from '../media/images/cheetah.png'
 
+/**
+ * @const {number}
+ * @note  For each image we have five animation frames:
+ *        Two to define its initial state,
+ *        One to separate them,
+ *        Two to define its final state where each strip is joined
+ */
+const MAX_ANIMATION_KEYFRAMES = 5
+
 class App {
+  /**
+   * @type {ShreddedImgManager}
+   */
+  #shreddedImgManager: ShreddedImgManager
+
   /**
    * @type {AnimationManager}
    */
@@ -24,22 +37,12 @@ class App {
   #canvas: HTMLCanvasElement
 
   /**
-   * @type {VerticalShreddedImg | null}
-   */
-  #evenVerticalShreddedImg: VerticalShreddedImg | null = null
-
-  /**
-   * @type {VerticalShreddedImg | null}
-   */
-  #oddVerticalShreddedImg: VerticalShreddedImg | null = null
-
-  /**
    * Constructor
    */
   constructor() {
     this.#initCanvas()
     this.#initAnimationManager()
-    this.#initVerticalShreddedImgs()
+    this.#initShreddedImgManager()
 
     this.#animate()
   }
@@ -51,29 +54,68 @@ class App {
    * @returns {void}
    */
   #animate(t: number = 0): void {
-    this.#clear()
-    this.#draw(t)
+    if (this.#shreddedImgManager.img.complete) {
+      this.#clear()
+      this.#processAnimations(t)
+      this.#draw()
+    }
+
     requestAnimationFrame(this.#animate.bind(this))
+  }
+
+  /**
+   * Process animations
+   *
+   * @param   {number} t
+   * @returns {void}
+   * @todo    For now, we are limiting the number of keyframes
+   *          to generate animation just for the vertical strips
+   *          and the horizontal ones.
+   *          Adapt logic so it is possible to generate more and more
+   *          animated and shredded images,
+   *          until there is no more space in canvas
+   */
+  #processAnimations(t: number): void {
+    /**
+     * @note Every time animation cycle will finish,
+     *       it is added a new animation cycle
+     */
+    if (
+      this.#animationManager.nextKeyframeIndex === 0 &&
+      this.#animationManager.keyframes.length < MAX_ANIMATION_KEYFRAMES
+    ) {
+      this.#addImageAnimations()
+    }
+
+    if (this.#animationManager.keyframes.length) {
+      this.#animationManager.play(t)
+    }
+  }
+
+  /**
+   * Add shredded image animations
+   *
+   * @returns {void}
+   */
+  #addImageAnimations(): void {
+    const [evenShreddedImg, oddShreddedImg] =
+      this.#shreddedImgManager.createShreddedImgs(0, 0)
+
+    this.#animationManager.addKeyframes(
+      evenShreddedImg,
+      oddShreddedImg,
+      0,
+      this.#canvas.height - this.#shreddedImgManager.height,
+    )
   }
 
   /**
    * Draw
    *
-   * @param   {number} t
    * @returns {void}
    */
-  #draw(t: number): void {
-    if (this.#animationManager.keyframes.length) {
-      this.#animationManager.play(t)
-    }
-
-    if (this.#evenVerticalShreddedImg) {
-      this.#evenVerticalShreddedImg.draw(this.#context)
-    }
-
-    if (this.#oddVerticalShreddedImg) {
-      this.#oddVerticalShreddedImg.draw(this.#context)
-    }
+  #draw(): void {
+    this.#shreddedImgManager.draw(this.#context)
   }
 
   /**
@@ -86,113 +128,15 @@ class App {
   }
 
   /**
-   * Init vertical shredded images
+   * Init shredded image manager
    *
    * @returns {void}
    */
-  #initVerticalShreddedImgs(): void {
-    const img = new Image()
-    img.src = cheetahImg
-
-    img.onload = () => {
-      const width = this.#canvas.width * 0.2
-      const ar = img.width / img.height
-      const height = width / ar
-      const stripSize = Math.ceil(width * 0.01)
-      const spread = 2
-
-      this.#evenVerticalShreddedImg = this.#createVerticalShreddedImg(
-        img,
-        width,
-        height,
-        true,
-        stripSize,
-        0,
-        0,
-        spread,
-      )
-      this.#oddVerticalShreddedImg = this.#createVerticalShreddedImg(
-        img,
-        width,
-        height,
-        false,
-        stripSize,
-        stripSize,
-        0,
-        spread,
-      )
-
-      this.#animationManager.add([
-        {
-          ref: this.#oddVerticalShreddedImg,
-          y: 0,
-          x: this.#oddVerticalShreddedImg.x,
-          spread: spread,
-        },
-        {
-          ref: this.#evenVerticalShreddedImg,
-          y: 0,
-          x: 0,
-          spread: spread,
-        },
-      ])
-      this.#animationManager.add([
-        {
-          ref: this.#oddVerticalShreddedImg,
-          y: 0,
-          x: this.#oddVerticalShreddedImg.x,
-          spread: spread,
-        },
-        {
-          ref: this.#evenVerticalShreddedImg,
-          y: 0,
-          x: 0,
-          spread: spread,
-        },
-      ])
-      this.#animationManager.add([
-        {
-          ref: this.#oddVerticalShreddedImg,
-          y: this.#canvas.height - height,
-          x: this.#oddVerticalShreddedImg.x,
-          spread: spread,
-        },
-        {
-          ref: this.#evenVerticalShreddedImg,
-          y: 0,
-          x: 0,
-          spread: spread,
-        },
-      ])
-      this.#animationManager.add([
-        {
-          ref: this.#oddVerticalShreddedImg,
-          y: this.#canvas.height - height,
-          x: 0,
-          spread: 1,
-        },
-        {
-          ref: this.#evenVerticalShreddedImg,
-          y: 0,
-          x: 0,
-          spread: 1,
-        },
-      ])
-      this.#animationManager.add([
-        {
-          ref: this.#oddVerticalShreddedImg,
-          y: this.#canvas.height - height,
-          x: 0,
-          spread: 1,
-        },
-        {
-          ref: this.#evenVerticalShreddedImg,
-          y: 0,
-          x: 0,
-          spread: 1,
-        },
-      ])
-    }
+  #initShreddedImgManager(): void {
+    this.#shreddedImgManager = new ShreddedImgManager(
+      cheetahImg,
+      this.#canvas.width * 0.2,
+    )
   }
 
   /**
@@ -216,41 +160,6 @@ class App {
     this.#canvas.width = window.innerWidth
     this.#canvas.height = window.innerHeight
     document.body.appendChild(this.#canvas)
-  }
-
-  /**
-   * Create vertical shredded image
-   *
-   * @param   {HTMLImageElement} img
-   * @param   {number}           width
-   * @param   {number}           height
-   * @param   {boolean}          isEven
-   * @param   {number}           stripSize
-   * @param   {number}           x
-   * @param   {number}           y
-   * @param   {number}           spread
-   * @returns {AbstractShreddedImg}
-   */
-  #createVerticalShreddedImg(
-    img: HTMLImageElement,
-    width: number,
-    height: number,
-    isEven: boolean = true,
-    stripSize: number,
-    x: number = 0,
-    y: number = 0,
-    spread: number = 2,
-  ): AbstractShreddedImg {
-    return new VerticalShreddedImg(
-      img,
-      width,
-      height,
-      stripSize,
-      spread,
-      x,
-      y,
-      isEven,
-    )
   }
 }
 new App()
