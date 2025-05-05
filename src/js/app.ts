@@ -2,7 +2,8 @@
  * @description App
  * @author      C. M. de Picciotto <d3p1@d3p1.dev> (https://d3p1.dev/)
  */
-import Img from './app/core/img.ts'
+import VerticalShreddedImg from './app/core/vertical-shredded-img.ts'
+import HorizontalShreddedImg from './app/core/horizontal-shredded-img.ts'
 import cheetahImg from '../media/images/cheetah.png'
 
 class App {
@@ -17,16 +18,21 @@ class App {
   #canvas: HTMLCanvasElement
 
   /**
-   * @type {Img | null}
+   * @type {VerticalShreddedImg | null}
    */
-  #img: Img | null = null
+  #verticalShreddedImg: VerticalShreddedImg | null = null
+
+  /**
+   * @type {HorizontalShreddedImg | null}
+   */
+  #horizontalShreddedImg: HorizontalShreddedImg | null = null
 
   /**
    * Constructor
    */
   constructor() {
     this.#initCanvas()
-    this.#initImg()
+    this.#initShreddedImg()
 
     this.#animate()
   }
@@ -48,8 +54,12 @@ class App {
    * @returns {void}
    */
   #draw(): void {
-    if (this.#img) {
-      this.#img.draw(this.#context, 0, 0)
+    if (this.#verticalShreddedImg) {
+      this.#verticalShreddedImg.draw(this.#context)
+    }
+
+    if (this.#horizontalShreddedImg) {
+      this.#horizontalShreddedImg.draw(this.#context)
     }
   }
 
@@ -67,7 +77,7 @@ class App {
    *
    * @returns {void}
    */
-  #initImg(): void {
+  #initShreddedImg(): void {
     const img = new Image()
     img.src = cheetahImg
 
@@ -75,7 +85,26 @@ class App {
       const width = this.#canvas.width * 0.2
       const ar = img.width / img.height
       const height = width / ar
-      this.#img = new Img(img, width, height)
+
+      this.#verticalShreddedImg = new VerticalShreddedImg(
+        img,
+        width,
+        height,
+        width * 0.1,
+        1,
+        0,
+        0,
+      )
+
+      this.#horizontalShreddedImg = new HorizontalShreddedImg(
+        img,
+        width,
+        height,
+        height * 0.1,
+        1,
+        0,
+        500,
+      )
     }
   }
 
