@@ -43,12 +43,14 @@ export default class HorizontalShreddedImg extends AbstractShreddedImg {
   ): void {
     super._initImg(img, width, height)
 
-    this._img.width = height
-    this._img.height = width
-    const context = this._img.getContext('2d') as CanvasRenderingContext2D
-    context.save()
-    context.rotate(-Math.PI / 2)
-    context.drawImage(img, 0, 0, -width, height)
-    context.restore()
+    if (this._img) {
+      this._img.width = height
+      this._img.height = width
+      const context = this._img.getContext('2d') as CanvasRenderingContext2D
+      context.save()
+      context.rotate(-Math.PI / 2)
+      context.drawImage(img, 0, 0, -width, height)
+      context.restore()
+    }
   }
 }

@@ -26,14 +26,14 @@ export default abstract class AbstractShreddedImg implements ShreddedImage {
   y: number
 
   /**
-   * @type {HTMLCanvasElement}
+   * @type {HTMLCanvasElement | null}
    */
-  protected _img: HTMLCanvasElement
+  protected _img: HTMLCanvasElement | null
 
   /**
    * @type {HTMLCanvasElement[]}
    */
-  protected _strips: HTMLCanvasElement[]
+  protected _strips: HTMLCanvasElement[] | null
 
   /**
    * Constructor
@@ -73,10 +73,22 @@ export default abstract class AbstractShreddedImg implements ShreddedImage {
    * @returns {void}
    */
   draw(context: CanvasRenderingContext2D): void {
-    for (let i = 0; i < this._strips.length; i++) {
-      const strip = this._strips[i]
-      this._drawStrip(context, strip, i)
+    if (this._strips) {
+      for (let i = 0; i < this._strips.length; i++) {
+        const strip = this._strips[i]
+        this._drawStrip(context, strip, i)
+      }
     }
+  }
+
+  /**
+   * Dispose
+   *
+   * @returns {void}
+   */
+  dispose(): void {
+    this._img = null
+    this._strips = null
   }
 
   /**
@@ -105,26 +117,30 @@ export default abstract class AbstractShreddedImg implements ShreddedImage {
    */
   protected _initStrips(isEven: boolean = true): void {
     this._strips = []
-    for (let x = 0; x < this._img.width; x += this.stripSize) {
-      if (isEven && (x / this.stripSize) % 2 === 0) {
-        const strip = document.createElement('canvas')
-        strip.width = this.stripSize
-        strip.height = this._img.height
+    if (this._img) {
+      for (let x = 0; x < this._img.width; x += this.stripSize) {
+        if (isEven && (x / this.stripSize) % 2 === 0) {
+          const strip = document.createElement('canvas')
+          strip.width = this.stripSize
+          strip.height = this._img.height
 
-        const stripContext = strip.getContext('2d') as CanvasRenderingContext2D
-        stripContext.drawImage(
-          this._img,
-          x,
-          0,
-          strip.width,
-          strip.height,
-          0,
-          0,
-          strip.width,
-          strip.height,
-        )
+          const stripContext = strip.getContext(
+            '2d',
+          ) as CanvasRenderingContext2D
+          stripContext.drawImage(
+            this._img,
+            x,
+            0,
+            strip.width,
+            strip.height,
+            0,
+            0,
+            strip.width,
+            strip.height,
+          )
 
-        this._strips.push(strip)
+          this._strips.push(strip)
+        }
       }
     }
   }
