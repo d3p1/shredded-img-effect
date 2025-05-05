@@ -27,7 +27,7 @@ export default class HorizontalShreddedImg extends AbstractShreddedImg {
     index: number,
   ): void {
     const x = this.y + this.stripSize * index * this.spread
-    context.drawImage(strip, x, this.x, strip.width, -strip.height)
+    context.drawImage(strip, x, -this.x, strip.width, -strip.height)
   }
 
   /**

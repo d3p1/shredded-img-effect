@@ -101,12 +101,21 @@ class App {
     const [evenShreddedImg, oddShreddedImg] =
       this.#shreddedImgManager.createShreddedImgs(0, 0)
 
-    this.#animationManager.addKeyframes(
-      evenShreddedImg,
-      oddShreddedImg,
-      0,
-      this.#canvas.height - this.#shreddedImgManager.height,
-    )
+    if (this.#shreddedImgManager.isHorizontalCreation) {
+      this.#animationManager.addKeyframes(
+        evenShreddedImg,
+        oddShreddedImg,
+        this.#canvas.width - this.#shreddedImgManager.width,
+        0,
+      )
+    } else {
+      this.#animationManager.addKeyframes(
+        evenShreddedImg,
+        oddShreddedImg,
+        0,
+        this.#canvas.height - this.#shreddedImgManager.height,
+      )
+    }
   }
 
   /**

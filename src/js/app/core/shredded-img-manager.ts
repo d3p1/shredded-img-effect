@@ -35,7 +35,7 @@ export default class ShreddedImgManager {
   /**
    * @type {boolean}
    */
-  #isHorizontalCreation: boolean = false
+  isHorizontalCreation: boolean = false
 
   /**
    * Constructor
@@ -74,14 +74,15 @@ export default class ShreddedImgManager {
    * @param   {number} x
    * @param   {number} y
    * @returns {AbstractShreddedImg[]}
-   * @note    It is toggle an internal flat to check if it is
+   * @note    It is toggle a flag to check if it is
    *          the horizontal version turn or vertical version turn
    */
   createShreddedImgs(x: number, y: number): AbstractShreddedImg[] {
     let evenShreddedImg
     let oddShreddedImg
 
-    if (this.#isHorizontalCreation) {
+    this.isHorizontalCreation = !this.isHorizontalCreation
+    if (this.isHorizontalCreation) {
       const stripSize = Math.ceil(this.height * 0.01)
 
       evenShreddedImg = this.#createHorizontalShreddedImg(true, stripSize, x, y)
@@ -102,8 +103,6 @@ export default class ShreddedImgManager {
         y,
       )
     }
-
-    this.#isHorizontalCreation = !this.#isHorizontalCreation
 
     this.shreddedImgs.push(evenShreddedImg)
     this.shreddedImgs.push(oddShreddedImg)
