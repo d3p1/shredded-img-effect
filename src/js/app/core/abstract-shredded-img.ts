@@ -45,6 +45,7 @@ export default abstract class AbstractShreddedImg implements ShreddedImage {
    * @param {number}           spread
    * @param {number}           x
    * @param {number}           y
+   * @param {boolean}          isEven
    */
   constructor(
     img: HTMLImageElement,
@@ -54,6 +55,7 @@ export default abstract class AbstractShreddedImg implements ShreddedImage {
     spread: number,
     x: number,
     y: number,
+    isEven: boolean = true,
   ) {
     this.stripSize = stripSize
     this.spread = spread
@@ -61,7 +63,7 @@ export default abstract class AbstractShreddedImg implements ShreddedImage {
     this.y = y
 
     this._initImg(img, width, height)
-    this._initStrips()
+    this._initStrips(isEven)
   }
 
   /**
@@ -97,30 +99,33 @@ export default abstract class AbstractShreddedImg implements ShreddedImage {
   /**
    * Init strips
    *
+   * @param   {boolean} isEven
    * @returns {void}
    * @note    By default, strips are being generated as vertical strips
    */
-  protected _initStrips(): void {
+  protected _initStrips(isEven: boolean = true): void {
     this._strips = []
     for (let x = 0; x < this._img.width; x += this.stripSize) {
-      const strip = document.createElement('canvas')
-      strip.width = this.stripSize
-      strip.height = this._img.height
+      if (isEven && (x / this.stripSize) % 2 === 0) {
+        const strip = document.createElement('canvas')
+        strip.width = this.stripSize
+        strip.height = this._img.height
 
-      const stripContext = strip.getContext('2d') as CanvasRenderingContext2D
-      stripContext.drawImage(
-        this._img,
-        x,
-        0,
-        strip.width,
-        strip.height,
-        0,
-        0,
-        strip.width,
-        strip.height,
-      )
+        const stripContext = strip.getContext('2d') as CanvasRenderingContext2D
+        stripContext.drawImage(
+          this._img,
+          x,
+          0,
+          strip.width,
+          strip.height,
+          0,
+          0,
+          strip.width,
+          strip.height,
+        )
 
-      this._strips.push(strip)
+        this._strips.push(strip)
+      }
     }
   }
 
