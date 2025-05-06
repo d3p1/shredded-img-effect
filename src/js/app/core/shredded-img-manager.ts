@@ -57,6 +57,49 @@ export default class ShreddedImgManager {
   }
 
   /**
+   * Duplicate given shredded image
+   *
+   * @param   {AbstractShreddedImg} shreddedImg
+   * @param   {boolean}             isHorizontalCreation
+   * @returns {AbstractShreddedImg[]}
+   */
+  duplicateShreddedImg(
+    shreddedImg: AbstractShreddedImg,
+    isHorizontalCreation: boolean,
+  ): AbstractShreddedImg[] {
+    /**
+     * @note It is persisted image strips in a canvas and then
+     *       is generated shredded image from this canvas
+     * @note Take into consideration that canvas will be generated
+     *       with the double of its width because it is drawn only
+     *       the even or odd strips, but because we are generating
+     *       the image source as `png`, the empty parts/strips will be
+     *       transparent
+     * @note It is updated the spread to 1 to build compact image
+     *       from strips
+     */
+    if (shreddedImg.img) {
+      const canvas = document.createElement('canvas')
+      const context = canvas.getContext('2d') as CanvasRenderingContext2D
+      canvas.width = shreddedImg.img.width
+      canvas.height = shreddedImg.img.height
+
+      const oldSpread = shreddedImg.spread
+      shreddedImg.spread = 1
+      shreddedImg.draw(context)
+      shreddedImg.spread = oldSpread
+
+      return this.createShreddedImgs(
+        canvas.toDataURL('image/png'),
+        canvas.width,
+        isHorizontalCreation,
+      )
+    }
+
+    return []
+  }
+
+  /**
    * Create shredded images.
    * It is created the even and the odd ones,
    * and they are reassembled
