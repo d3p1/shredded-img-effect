@@ -1,3 +1,11 @@
+# [1.2.0](https://github.com/d3p1/shredded-img-effect/compare/v1.1.0...v1.2.0) (2025-05-06)
+
+
+### Features
+
+* add final effect [[#1](https://github.com/d3p1/shredded-img-effect/issues/1)] ([d438372](https://github.com/d3p1/shredded-img-effect/commit/d43837289bed96d821ab913f57b83b5d3b487382))
+* improve how shredded images are generated to modify existing images [[#1](https://github.com/d3p1/shredded-img-effect/issues/1)] ([d43eb3e](https://github.com/d3p1/shredded-img-effect/commit/d43eb3e548be7820588554210f2e2495d48fb546))
+
 # [1.1.0](https://github.com/d3p1/shredded-img-effect/compare/v1.0.2...v1.1.0) (2025-05-05)
 
 
