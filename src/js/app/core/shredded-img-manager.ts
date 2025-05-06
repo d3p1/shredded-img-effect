@@ -46,14 +46,16 @@ export default class ShreddedImgManager {
   }
 
   /**
-   * Create shredded images. It is created the even and the odd ones
+   * Create shredded images.
+   * It is created the even and the odd ones,
+   * and they are reassembled
+   * (it is offset the `x`/`y` coordinate of the odd ones)
+   * to build the original image
    *
    * @param   {string}  src
    * @param   {number}  width
    * @param   {boolean} isHorizontalCreation
    * @returns {AbstractShreddedImg[]}
-   * @note    It is toggle a flag to check if it is
-   *          the horizontal version turn or vertical version turn
    */
   createShreddedImgs(
     src: string,

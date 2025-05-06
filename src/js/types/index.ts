@@ -3,6 +3,7 @@
  * @author      C. M. de Picciotto <d3p1@d3p1.dev> (https://d3p1.dev/)
  */
 export interface ShreddedImage {
+  strips: HTMLCanvasElement[]
   stripSize: number
   spread: number
   x: number
