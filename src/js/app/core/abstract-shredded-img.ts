@@ -116,7 +116,7 @@ export default abstract class AbstractShreddedImg implements ShreddedImage {
    * @returns {void}
    */
   protected _initImg(img: HTMLImageElement, width: number): void {
-    const ar = width / img.height
+    const ar = img.width / img.height
     const height = width / ar
     this.img = document.createElement('canvas')
     this.img.width = width
