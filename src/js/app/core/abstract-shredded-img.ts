@@ -82,16 +82,6 @@ export default abstract class AbstractShreddedImg implements ShreddedImage {
   }
 
   /**
-   * Dispose
-   *
-   * @returns {void}
-   */
-  dispose(): void {
-    this._img = null
-    this._strips = null
-  }
-
-  /**
    * Draw strip
    *
    * @param   {CanvasRenderingContext2D} context
