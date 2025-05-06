@@ -3,28 +3,13 @@
  * @author      C. M. de Picciotto <d3p1@d3p1.dev> (https://d3p1.dev/)
  */
 import Mathy from '../../utils/mathy.ts'
-import {ShreddedImage, Keyframe} from '../../types'
+import {ShreddedImageKeyframe, ShreddedImageAnimation} from '../../types'
 
 export default class AnimationManager {
   /**
-   * @type {Array<{ref: ShreddedImage} & object>[]}
+   * @type {Array<{ref: ShreddedImageAnimation} & object>[]}
    */
-  keyframes: Keyframe<ShreddedImage>[] = []
-
-  /**
-   * @type {number}
-   */
-  currentKeyframeIndex: number = 0
-
-  /**
-   * @type {number}
-   */
-  nextKeyframeIndex: number = 0
-
-  /**
-   * @type {boolean}
-   */
-  isPaused: boolean = false
+  keyframes: ShreddedImageKeyframe[] = []
 
   /**
    * @type {(t: number) => number}
@@ -51,55 +36,34 @@ export default class AnimationManager {
   }
 
   /**
-   * Pause
-   *
-   * @returns {void}
-   */
-  pause(): void {
-    this.isPaused = true
-  }
-
-  /**
-   * Play
-   *
-   * @returns {void}
-   */
-  play(): void {
-    this.isPaused = false
-  }
-
-  /**
    * Update
    *
    * @param   {number} time
    * @returns {void}
-   * @todo    Improve how properties are processed
-   * @todo    Improve how property types are managed
    */
   update(time: number = 0): void {
-    if (!this.isPaused) {
-      this.currentKeyframeIndex =
-        Math.floor(time / this.#duration) % this.keyframes.length
-      this.nextKeyframeIndex =
-        (this.currentKeyframeIndex + 1) % this.keyframes.length
+    const currentKeyframeIndex =
+      Math.floor(time / this.#duration) % this.keyframes.length
+    const nextKeyframeIndex = (currentKeyframeIndex + 1) % this.keyframes.length
 
-      const currentKeyframe = this.keyframes[this.currentKeyframeIndex]
-      const nextKeyframe = this.keyframes[this.nextKeyframeIndex]
-      const t = this.#easing((time % this.#duration) / this.#duration)
+    const currentKeyframe = this.keyframes[currentKeyframeIndex]
+    const nextKeyframe = this.keyframes[nextKeyframeIndex]
+    const t = this.#easing((time % this.#duration) / this.#duration)
 
-      for (let i = 0; i < currentKeyframe.length; i++) {
-        const {ref, ...properties} = currentKeyframe[i]
-        for (const property in properties) {
-          const startValue = currentKeyframe[i][property as keyof ShreddedImage]
-          const endValue = nextKeyframe[i][property as keyof ShreddedImage]
+    for (let i = 0; i < currentKeyframe.length; i++) {
+      const {ref, ...properties} = currentKeyframe[i]
+      for (const property in properties) {
+        const startValue =
+          currentKeyframe[i][property as keyof ShreddedImageAnimation]
+        const endValue =
+          nextKeyframe[i][property as keyof ShreddedImageAnimation]
 
-          if (startValue !== undefined && endValue !== undefined) {
-            ref[property as keyof ShreddedImage] = Mathy.lerp(
-              startValue,
-              endValue,
-              t,
-            )
-          }
+        if (startValue !== undefined && endValue !== undefined) {
+          ref[property as keyof ShreddedImageAnimation] = Mathy.lerp(
+            startValue,
+            endValue,
+            t,
+          )
         }
       }
     }
@@ -108,10 +72,10 @@ export default class AnimationManager {
   /**
    * Add keyframe
    *
-   * @param   {Array<{ref: ShreddedImage} & object>} keyframe
+   * @param   {Array<{ref: ShreddedImageAnimation} & object>} keyframe
    * @returns {void}
    */
-  add(keyframe: Keyframe<ShreddedImage>): void {
+  add(keyframe: ShreddedImageKeyframe): void {
     this.keyframes.push(keyframe)
   }
 }

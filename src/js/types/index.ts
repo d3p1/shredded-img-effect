@@ -10,6 +10,10 @@ export interface ShreddedImage {
   y: number
 }
 
+export type ShreddedImageAnimation = Omit<ShreddedImage, 'strips' | 'stripSize'>
+
 export type Keyframe<T extends object> = Array<
   {ref: T} & {[K in keyof T]?: T[K]}
 >
+
+export type ShreddedImageKeyframe = Keyframe<ShreddedImageAnimation>
