@@ -22,6 +22,11 @@ export default class AnimationManager {
   nextKeyframeIndex: number = 0
 
   /**
+   * @type {boolean}
+   */
+  isPaused: boolean = false
+
+  /**
    * @type {(t: number) => number}
    */
   readonly #easing: (t: number) => number
@@ -46,35 +51,55 @@ export default class AnimationManager {
   }
 
   /**
+   * Pause
+   *
+   * @returns {void}
+   */
+  pause(): void {
+    this.isPaused = true
+  }
+
+  /**
    * Play
+   *
+   * @returns {void}
+   */
+  play(): void {
+    this.isPaused = false
+  }
+
+  /**
+   * Update
    *
    * @param   {number} time
    * @returns {void}
    * @todo    Improve how properties are processed
    * @todo    Improve how property types are managed
    */
-  play(time: number = 0): void {
-    this.currentKeyframeIndex =
-      Math.floor(time / this.#duration) % this.keyframes.length
-    this.nextKeyframeIndex =
-      (this.currentKeyframeIndex + 1) % this.keyframes.length
+  update(time: number = 0): void {
+    if (!this.isPaused) {
+      this.currentKeyframeIndex =
+        Math.floor(time / this.#duration) % this.keyframes.length
+      this.nextKeyframeIndex =
+        (this.currentKeyframeIndex + 1) % this.keyframes.length
 
-    const currentKeyframe = this.keyframes[this.currentKeyframeIndex]
-    const nextKeyframe = this.keyframes[this.nextKeyframeIndex]
-    const t = this.#easing((time % this.#duration) / this.#duration)
+      const currentKeyframe = this.keyframes[this.currentKeyframeIndex]
+      const nextKeyframe = this.keyframes[this.nextKeyframeIndex]
+      const t = this.#easing((time % this.#duration) / this.#duration)
 
-    for (let i = 0; i < currentKeyframe.length; i++) {
-      const {ref, ...properties} = currentKeyframe[i]
-      for (const property in properties) {
-        const startValue = currentKeyframe[i][property as keyof ShreddedImage]
-        const endValue = nextKeyframe[i][property as keyof ShreddedImage]
+      for (let i = 0; i < currentKeyframe.length; i++) {
+        const {ref, ...properties} = currentKeyframe[i]
+        for (const property in properties) {
+          const startValue = currentKeyframe[i][property as keyof ShreddedImage]
+          const endValue = nextKeyframe[i][property as keyof ShreddedImage]
 
-        if (startValue !== undefined && endValue !== undefined) {
-          ref[property as keyof ShreddedImage] = Mathy.lerp(
-            startValue,
-            endValue,
-            t,
-          )
+          if (startValue !== undefined && endValue !== undefined) {
+            ref[property as keyof ShreddedImage] = Mathy.lerp(
+              startValue,
+              endValue,
+              t,
+            )
+          }
         }
       }
     }

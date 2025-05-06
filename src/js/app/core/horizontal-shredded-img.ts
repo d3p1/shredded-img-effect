@@ -39,20 +39,22 @@ export default class HorizontalShreddedImg extends AbstractShreddedImg {
    *       instead of rewrite all the method
    */
   protected _initImg(src: string, width: number, isEven: boolean): void {
-    const img = new Image()
-    img.src = src
+    this.img = new Image()
+    this.img.src = src
 
-    img.onload = () => {
-      const ar = img.width / img.height
+    this.img.onload = () => {
+      const ar = this.img.width / this.img.height
       const height = width / ar
 
-      this.img = document.createElement('canvas')
-      this.img.width = height
-      this.img.height = width
-      const context = this.img.getContext('2d') as CanvasRenderingContext2D
+      this.canvasImg = document.createElement('canvas')
+      this.canvasImg.width = height
+      this.canvasImg.height = width
+      const context = this.canvasImg.getContext(
+        '2d',
+      ) as CanvasRenderingContext2D
       context.save()
       context.rotate(-Math.PI / 2)
-      context.drawImage(img, 0, 0, -width, height)
+      context.drawImage(this.img, 0, 0, -width, height)
       context.restore()
 
       this._initStrips(isEven)

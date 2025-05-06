@@ -23,11 +23,6 @@ export default class ShreddedImgManager {
   spread: number
 
   /**
-   * @type {boolean}
-   */
-  isHorizontalCreation: boolean = false
-
-  /**
    * Constructor
    *
    * @param {number} stripSize
@@ -53,18 +48,22 @@ export default class ShreddedImgManager {
   /**
    * Create shredded images. It is created the even and the odd ones
    *
-   * @param   {string} src
-   * @param   {number} width
+   * @param   {string}  src
+   * @param   {number}  width
+   * @param   {boolean} isHorizontalCreation
    * @returns {AbstractShreddedImg[]}
    * @note    It is toggle a flag to check if it is
    *          the horizontal version turn or vertical version turn
    */
-  createShreddedImgs(src: string, width: number): AbstractShreddedImg[] {
+  createShreddedImgs(
+    src: string,
+    width: number,
+    isHorizontalCreation: boolean = true,
+  ): AbstractShreddedImg[] {
     let evenShreddedImg
     let oddShreddedImg
 
-    this.isHorizontalCreation = !this.isHorizontalCreation
-    if (this.isHorizontalCreation) {
+    if (isHorizontalCreation) {
       evenShreddedImg = this.#createHorizontalShreddedImg(src, width, true)
       oddShreddedImg = this.#createHorizontalShreddedImg(src, width, false)
       oddShreddedImg.y += oddShreddedImg.stripSize

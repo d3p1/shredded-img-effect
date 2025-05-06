@@ -8,12 +8,17 @@ export default abstract class AbstractShreddedImg implements ShreddedImage {
   /**
    * @type {HTMLCanvasElement | null}
    */
-  img: HTMLCanvasElement | null
+  canvasImg: HTMLCanvasElement | null
 
   /**
    * @type {HTMLCanvasElement[]}
    */
   strips: HTMLCanvasElement[] | null
+
+  /**
+   * @type {HTMLImageElement}
+   */
+  img: HTMLImageElement
 
   /**
    * @type {number}
@@ -105,18 +110,20 @@ export default abstract class AbstractShreddedImg implements ShreddedImage {
    * @note    Image is persisted in a canvas to be able to process it
    */
   protected _initImg(src: string, width: number, isEven: boolean): void {
-    const img = new Image()
-    img.src = src
+    this.img = new Image()
+    this.img.src = src
 
-    img.onload = () => {
-      const ar = img.width / img.height
+    this.img.onload = () => {
+      const ar = this.img.width / this.img.height
       const height = width / ar
 
-      this.img = document.createElement('canvas')
-      this.img.width = width
-      this.img.height = height
-      const context = this.img.getContext('2d') as CanvasRenderingContext2D
-      context.drawImage(img, 0, 0, width, height)
+      this.canvasImg = document.createElement('canvas')
+      this.canvasImg.width = width
+      this.canvasImg.height = height
+      const context = this.canvasImg.getContext(
+        '2d',
+      ) as CanvasRenderingContext2D
+      context.drawImage(this.img, 0, 0, width, height)
 
       this._initStrips(isEven)
     }
@@ -131,8 +138,8 @@ export default abstract class AbstractShreddedImg implements ShreddedImage {
    */
   protected _initStrips(isEven: boolean = true): void {
     this.strips = []
-    if (this.img) {
-      for (let x = 0; x < this.img.width; x += this.stripSize) {
+    if (this.canvasImg) {
+      for (let x = 0; x < this.canvasImg.width; x += this.stripSize) {
         if (
           (isEven && (x / this.stripSize) % 2 === 0) ||
           (!isEven && (x / this.stripSize) % 2 !== 0)
@@ -153,14 +160,14 @@ export default abstract class AbstractShreddedImg implements ShreddedImage {
    * @returns {HTMLCanvasElement | null}
    */
   protected _initStrip(x: number): HTMLCanvasElement | null {
-    if (this.img) {
+    if (this.canvasImg) {
       const strip = document.createElement('canvas')
       strip.width = this.stripSize
-      strip.height = this.img.height
+      strip.height = this.canvasImg.height
 
       const stripContext = strip.getContext('2d') as CanvasRenderingContext2D
       stripContext.drawImage(
-        this.img,
+        this.canvasImg,
         x,
         0,
         strip.width,

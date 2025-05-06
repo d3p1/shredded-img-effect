@@ -2,20 +2,21 @@
  * @description App
  * @author      C. M. de Picciotto <d3p1@d3p1.dev> (https://d3p1.dev/)
  */
+import AbstractShreddedImg from './app/core/abstract-shredded-img.ts'
 import AnimationManager from './app/animator/shredded-img-animation-manager.ts'
 import ShreddedImgManager from './app/core/shredded-img-manager.ts'
 import cheetahImg from '../media/images/cheetah.png'
 
 class App {
   /**
-   * @type {ShreddedImgManager}
-   */
-  #shreddedImgManager: ShreddedImgManager
-
-  /**
    * @type {AnimationManager}
    */
-  #animationManager: AnimationManager
+  #animationManagers: AnimationManager[]
+
+  /**
+   * @type {ShreddedImgManager[]}
+   */
+  #shreddedImgManagers: ShreddedImgManager[]
 
   /**
    * @type {CanvasRenderingContext2D}
@@ -28,12 +29,22 @@ class App {
   #canvas: HTMLCanvasElement
 
   /**
+   * @type {number[]}
+   */
+  #timeByIndex: number[] = [0, 0]
+
+  /**
+   * @type {number}
+   */
+  #time: number = 0
+
+  /**
    * Constructor
    */
   constructor() {
     this.#initCanvas()
-    this.#initAnimationManager()
-    this.#initShreddedImgManager()
+    this.#initAnimationManagers()
+    this.#initShreddedImgManagers()
     this.#initImageAnimations()
 
     this.#animate()
@@ -46,9 +57,10 @@ class App {
    * @returns {void}
    */
   #animate(t: number = 0): void {
+    const deltaTime = t - this.#time
     this.#clear()
-    this.#processAnimations(t)
-    this.#draw()
+    this.#processAnimations(deltaTime)
+    this.#time = t
 
     requestAnimationFrame((t) => this.#animate(t))
   }
@@ -56,22 +68,45 @@ class App {
   /**
    * Process animations
    *
-   * @param   {number} t
+   * @param   {number} deltaTime
    * @returns {void}
+   * @todo    Improve this logic
    */
-  #processAnimations(t: number): void {
-    if (this.#animationManager.keyframes.length) {
-      this.#animationManager.play(t)
+  #processAnimations(deltaTime: number): void {
+    if (!this.#animationManagers[0].isPaused) {
+      this.#processAnimationByIndex(0, 1, deltaTime)
+    }
+
+    if (!this.#animationManagers[1].isPaused) {
+      this.#processAnimationByIndex(1, 0, deltaTime)
     }
   }
 
   /**
-   * Draw
+   * Update animation by index
    *
+   * @param   {number} currentIndex
+   * @param   {number} nextIndex
+   * @param   {number} deltaTime
    * @returns {void}
    */
-  #draw(): void {
-    this.#shreddedImgManager.draw(this.#context)
+  #processAnimationByIndex(
+    currentIndex: number,
+    nextIndex: number,
+    deltaTime: number,
+  ): void {
+    this.#timeByIndex[currentIndex] += deltaTime
+    this.#animationManagers[currentIndex].update(
+      this.#timeByIndex[currentIndex],
+    )
+    this.#shreddedImgManagers[currentIndex].draw(this.#context)
+    if (
+      this.#animationManagers[currentIndex].currentKeyframeIndex ===
+      this.#animationManagers[currentIndex].keyframes.length - 1
+    ) {
+      this.#animationManagers[currentIndex].pause()
+      this.#animationManagers[nextIndex].play()
+    }
   }
 
   /**
@@ -89,45 +124,104 @@ class App {
    * @returns {void}
    */
   #initImageAnimations(): void {
-    const [evenShreddedImg, oddShreddedImg] =
-      this.#shreddedImgManager.createShreddedImgs(
+    const [evenVerticalShreddedImg, oddVerticalShreddedImg] =
+      this.#initVerticalImageAnimations()
+
+    this.#initHorizontalImageAnimations([
+      evenVerticalShreddedImg,
+      oddVerticalShreddedImg,
+    ])
+
+    this.#animationManagers[0].play()
+    this.#animationManagers[1].pause()
+  }
+
+  /**
+   * Init vertical image animations
+   *
+   * @returns {AbstractShreddedImg[]}
+   */
+  #initVerticalImageAnimations(): AbstractShreddedImg[] {
+    const [evenVerticalShreddedImg, oddVerticalShreddedImg] =
+      this.#shreddedImgManagers[0].createShreddedImgs(
         cheetahImg,
         this.#canvas.width * 0.2,
+        false,
       )
 
-    if (this.#shreddedImgManager.isHorizontalCreation) {
-      this.#animationManager.addKeyframes(
-        evenShreddedImg,
-        oddShreddedImg,
-        this.#canvas.width * 0.5,
-        0,
-      )
-    } else {
-      this.#animationManager.addKeyframes(
-        evenShreddedImg,
-        oddShreddedImg,
-        0,
-        this.#canvas.height * 0.5,
-      )
+    this.#animationManagers[0].addKeyframes(
+      evenVerticalShreddedImg,
+      oddVerticalShreddedImg,
+      0,
+      this.#canvas.height * 0.5,
+    )
+
+    return [evenVerticalShreddedImg, oddVerticalShreddedImg]
+  }
+
+  /**
+   * Init horizontal image animations
+   *
+   * @param   {AbstractShreddedImg[]} shreddedImgs
+   * @returns {void}
+   * @todo    Improve keyframe `y` location logic
+   */
+  #initHorizontalImageAnimations(shreddedImgs: AbstractShreddedImg[]): void {
+    for (let i = 0; i < shreddedImgs.length; i++) {
+      const shreddedImg = shreddedImgs[i]
+      const onload = shreddedImg.img.onload
+      shreddedImg.img.onload = (e) => {
+        if (onload) {
+          onload.call(shreddedImg.img, e)
+        }
+
+        const src = shreddedImg.canvasImg!.toDataURL()
+        const [evenHorizontalShreddedImg, oddHorizontalShreddedImg] =
+          this.#shreddedImgManagers[1].createShreddedImgs(
+            src,
+            shreddedImg.canvasImg!.width * 0.5,
+          )
+
+        this.#animationManagers[1].addKeyframes(
+          evenHorizontalShreddedImg,
+          oddHorizontalShreddedImg,
+          0,
+          this.#canvas.height * 0.5 * i,
+        )
+      }
     }
   }
 
   /**
-   * Init shredded image manager
+   * Init shredded image managers
    *
    * @returns {void}
+   * @todo    It is generated two shredded image managers,
+   *          the first one for vertical shredded images
+   *          and the second one for horizontal shredded images.
+   *          Improve this logic and related logic
    */
-  #initShreddedImgManager(): void {
-    this.#shreddedImgManager = new ShreddedImgManager()
+  #initShreddedImgManagers(): void {
+    this.#shreddedImgManagers = [
+      new ShreddedImgManager(),
+      new ShreddedImgManager(),
+    ]
   }
 
   /**
    * Init animation manager
    *
    * @returns {void}
+   * @todo    It is generated two animation managers,
+   *          the first one for vertical shredded images
+   *          and the second one for horizontal shredded images.
+   *          Improve this logic and related logic
    */
-  #initAnimationManager(): void {
-    this.#animationManager = new AnimationManager(2000, (t) => t ** 2)
+  #initAnimationManagers(): void {
+    this.#animationManagers = [
+      new AnimationManager(2000, (t) => t ** 2),
+      new AnimationManager(2000, (t) => t ** 2),
+    ]
   }
 
   /**
