@@ -34,6 +34,17 @@ export default class ShreddedImgManager {
   }
 
   /**
+   * Check if all generated images are loaded
+   *
+   * @returns {boolean}
+   */
+  isReady(): boolean {
+    return this.shreddedImgs.every(
+      (shreddedImg) => shreddedImg.imgElement.complete,
+    )
+  }
+
+  /**
    * Draw
    *
    * @param   {CanvasRenderingContext2D} context
