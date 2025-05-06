@@ -8,6 +8,7 @@ export interface ShreddedImage {
   spread: number
   x: number
   y: number
+  alpha: number
 }
 
 export type ShreddedImageAnimation = Omit<ShreddedImage, 'strips' | 'stripSize'>

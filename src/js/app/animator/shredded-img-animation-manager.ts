@@ -1,79 +1,539 @@
 /**
  * @description Animation manager for shredded images
  * @author      C. M. de Picciotto <d3p1@d3p1.dev> (https://d3p1.dev/)
- * @note        This is just a class to encapsulate animation logic
- *              related to shredded images
+ * @todo        This is just a class to encapsulate animation logic
+ *              related to shredded images.
+ *              Improve methods
+ * @todo        We are going to play with the alpha to hide images
+ *              and only show them when it is necessary.
+ *              Improve this behaviour
  */
+import VerticalShreddedImg from '../core/vertical-shredded-img.ts'
+import HorizontalShreddedImg from '../core/horizontal-shredded-img.ts'
 import AnimationManager from './animation-manager.ts'
-import AbstractShreddedImg from '../core/abstract-shredded-img.ts'
-import {Keyframe} from '../../types'
+import {ShreddedImageKeyframe} from '../../types'
 
 export default class ShreddedImgAnimationManager extends AnimationManager {
   /**
-   * Add keyframes for shredded images
+   * Animate shredded images
    *
-   * @param   {AbstractShreddedImg} evenShreddedImg
-   * @param   {AbstractShreddedImg} oddShreddedImg
-   * @param   {number}              finalX
-   * @param   {number}              finalY
+   * @param   {VerticalShreddedImg}   evenVerticalShreddedImg
+   * @param   {VerticalShreddedImg}   oddVerticalShreddedImg
+   * @param   {HorizontalShreddedImg} evenHorizontalShreddedImgForEvenVertical
+   * @param   {HorizontalShreddedImg} oddHorizontalShreddedImgForEvenVertical
+   * @param   {HorizontalShreddedImg} evenHorizontalShreddedImgForOddVertical
+   * @param   {HorizontalShreddedImg} oddHorizontalShreddedImgForOddVertical
+   * @param   {number}                canvasWidth
+   * @param   {number}                canvasHeight
    * @returns {void}
    */
-  addKeyframes(
-    evenShreddedImg: AbstractShreddedImg,
-    oddShreddedImg: AbstractShreddedImg,
-    finalX: number,
-    finalY: number,
+  animateShreddedImgs(
+    evenVerticalShreddedImg: VerticalShreddedImg,
+    oddVerticalShreddedImg: VerticalShreddedImg,
+    evenHorizontalShreddedImgForEvenVertical: HorizontalShreddedImg,
+    oddHorizontalShreddedImgForEvenVertical: HorizontalShreddedImg,
+    evenHorizontalShreddedImgForOddVertical: HorizontalShreddedImg,
+    oddHorizontalShreddedImgForOddVertical: HorizontalShreddedImg,
+    canvasWidth: number,
+    canvasHeight: number,
   ): void {
-    this.#repeatKeyframe(
-      [
-        {
-          ref: evenShreddedImg,
-          x: evenShreddedImg.x,
-          y: evenShreddedImg.y,
-          spread: evenShreddedImg.spread,
-        },
-        {
-          ref: oddShreddedImg,
-          x: oddShreddedImg.x,
-          y: oddShreddedImg.y,
-          spread: oddShreddedImg.spread,
-        },
-      ],
-      2,
-    )
+    if (
+      evenVerticalShreddedImg.img &&
+      oddVerticalShreddedImg.img &&
+      evenHorizontalShreddedImgForEvenVertical.img &&
+      oddHorizontalShreddedImgForEvenVertical.img &&
+      evenHorizontalShreddedImgForOddVertical.img &&
+      oddHorizontalShreddedImgForOddVertical.img
+    ) {
+      this.#repeatKeyframe(
+        [
+          {
+            ref: evenVerticalShreddedImg,
+            x: 0,
+            y: 0,
+            spread: 2,
+            alpha: 1,
+          },
+          {
+            ref: oddVerticalShreddedImg,
+            x: oddVerticalShreddedImg.stripSize,
+            y: 0,
+            spread: 2,
+            alpha: 1,
+          },
+          {
+            ref: evenHorizontalShreddedImgForEvenVertical,
+            x: 0,
+            y: 0,
+            spread: evenHorizontalShreddedImgForEvenVertical.spread,
+            alpha: 0,
+          },
+          {
+            ref: oddHorizontalShreddedImgForEvenVertical,
+            x: 0,
+            y: 0,
+            spread: oddHorizontalShreddedImgForEvenVertical.spread,
+            alpha: 0,
+          },
+          {
+            ref: evenHorizontalShreddedImgForOddVertical,
+            x: 0,
+            y: canvasHeight - oddVerticalShreddedImg.img.height,
+            spread: evenHorizontalShreddedImgForOddVertical.spread,
+            alpha: 0,
+          },
+          {
+            ref: oddHorizontalShreddedImgForOddVertical,
+            x: 0,
+            y: canvasHeight - oddVerticalShreddedImg.img.height,
+            spread: oddHorizontalShreddedImgForOddVertical.spread,
+            alpha: 0,
+          },
+        ],
+        2,
+      )
 
-    this.add([
-      {
-        ref: evenShreddedImg,
-        x: evenShreddedImg.x,
-        y: evenShreddedImg.y,
-        spread: evenShreddedImg.spread,
-      },
-      {
-        ref: oddShreddedImg,
-        x: finalX,
-        y: finalY,
-        spread: oddShreddedImg.spread,
-      },
-    ])
+      this.add([
+        {
+          ref: evenVerticalShreddedImg,
+          x: 0,
+          y: 0,
+          spread: 2,
+          alpha: 1,
+        },
+        {
+          ref: oddVerticalShreddedImg,
+          x: 0,
+          y: canvasHeight - oddVerticalShreddedImg.img.height,
+          spread: 2,
+          alpha: 1,
+        },
+        {
+          ref: evenHorizontalShreddedImgForEvenVertical,
+          x: 0,
+          y: 0,
+          spread: evenHorizontalShreddedImgForEvenVertical.spread,
+          alpha: 0,
+        },
+        {
+          ref: oddHorizontalShreddedImgForEvenVertical,
+          x: 0,
+          y: 0,
+          spread: oddHorizontalShreddedImgForEvenVertical.spread,
+          alpha: 0,
+        },
+        {
+          ref: evenHorizontalShreddedImgForOddVertical,
+          x: 0,
+          y: canvasHeight - oddVerticalShreddedImg.img.height,
+          spread: evenHorizontalShreddedImgForOddVertical.spread,
+          alpha: 0,
+        },
+        {
+          ref: oddHorizontalShreddedImgForOddVertical,
+          x: 0,
+          y: canvasHeight - oddVerticalShreddedImg.img.height,
+          spread: oddHorizontalShreddedImgForOddVertical.spread,
+          alpha: 0,
+        },
+      ])
 
-    this.#repeatKeyframe(
-      [
+      this.add([
         {
-          ref: evenShreddedImg,
-          x: evenShreddedImg.x,
-          y: evenShreddedImg.y,
+          ref: evenVerticalShreddedImg,
+          x: 0,
+          y: 0,
           spread: 1,
+          alpha: 1,
         },
         {
-          ref: oddShreddedImg,
-          x: finalX,
-          y: finalY,
+          ref: oddVerticalShreddedImg,
+          x: 0,
+          y: canvasHeight - oddVerticalShreddedImg.img.height,
           spread: 1,
+          alpha: 1,
         },
-      ],
-      2,
-    )
+        {
+          ref: evenHorizontalShreddedImgForEvenVertical,
+          x: 0,
+          y: 0,
+          spread: evenHorizontalShreddedImgForEvenVertical.spread,
+          alpha: 0,
+        },
+        {
+          ref: oddHorizontalShreddedImgForEvenVertical,
+          x: 0,
+          y: 0,
+          spread: oddHorizontalShreddedImgForEvenVertical.spread,
+          alpha: 0,
+        },
+        {
+          ref: evenHorizontalShreddedImgForOddVertical,
+          x: 0,
+          y: canvasHeight - oddVerticalShreddedImg.img.height,
+          spread: evenHorizontalShreddedImgForOddVertical.spread,
+          alpha: 0,
+        },
+        {
+          ref: oddHorizontalShreddedImgForOddVertical,
+          x: 0,
+          y: canvasHeight - oddVerticalShreddedImg.img.height,
+          spread: oddHorizontalShreddedImgForOddVertical.spread,
+          alpha: 0,
+        },
+      ])
+
+      this.add([
+        {
+          ref: evenVerticalShreddedImg,
+          x: 0,
+          y: 0,
+          spread: 1,
+          alpha: 1,
+        },
+        {
+          ref: oddVerticalShreddedImg,
+          x: 0,
+          y: canvasHeight - oddVerticalShreddedImg.img.height,
+          spread: 1,
+          alpha: 1,
+        },
+        {
+          ref: evenHorizontalShreddedImgForEvenVertical,
+          x: 0,
+          y: 0,
+          spread: 2,
+          alpha: 1,
+        },
+        {
+          ref: oddHorizontalShreddedImgForEvenVertical,
+          x: 0,
+          y: oddHorizontalShreddedImgForEvenVertical.stripSize,
+          spread: 2,
+          alpha: 1,
+        },
+        {
+          ref: evenHorizontalShreddedImgForOddVertical,
+          x: 0,
+          y: canvasHeight - oddVerticalShreddedImg.img.height,
+          spread: 2,
+          alpha: 1,
+        },
+        {
+          ref: oddHorizontalShreddedImgForOddVertical,
+          x: 0,
+          y:
+            canvasHeight -
+            oddVerticalShreddedImg.img.height +
+            oddHorizontalShreddedImgForOddVertical.stripSize,
+          spread: 2,
+          alpha: 1,
+        },
+      ])
+
+      this.add([
+        {
+          ref: evenVerticalShreddedImg,
+          x: 0,
+          y: 0,
+          spread: 1,
+          alpha: 0,
+        },
+        {
+          ref: oddVerticalShreddedImg,
+          x: 0,
+          y: canvasHeight - oddVerticalShreddedImg.img.height,
+          spread: 1,
+          alpha: 0,
+        },
+        {
+          ref: evenHorizontalShreddedImgForEvenVertical,
+          x: 0,
+          y: 0,
+          spread: 2,
+          alpha: 1,
+        },
+        {
+          ref: oddHorizontalShreddedImgForEvenVertical,
+          x: 0,
+          y: oddHorizontalShreddedImgForEvenVertical.stripSize,
+          spread: 2,
+          alpha: 1,
+        },
+        {
+          ref: evenHorizontalShreddedImgForOddVertical,
+          x: 0,
+          y: canvasHeight - oddVerticalShreddedImg.img.height,
+          spread: 2,
+          alpha: 1,
+        },
+        {
+          ref: oddHorizontalShreddedImgForOddVertical,
+          x: 0,
+          y:
+            canvasHeight -
+            oddVerticalShreddedImg.img.height +
+            oddHorizontalShreddedImgForOddVertical.stripSize,
+          spread: 2,
+          alpha: 1,
+        },
+      ])
+
+      this.add([
+        {
+          ref: evenVerticalShreddedImg,
+          x: 0,
+          y: 0,
+          spread: 1,
+          alpha: 0,
+        },
+        {
+          ref: oddVerticalShreddedImg,
+          x: 0,
+          y: canvasHeight - oddVerticalShreddedImg.img.height,
+          spread: 1,
+          alpha: 0,
+        },
+        {
+          ref: evenHorizontalShreddedImgForEvenVertical,
+          x: 0,
+          y: 0,
+          spread: 2,
+          alpha: 1,
+        },
+        {
+          ref: oddHorizontalShreddedImgForEvenVertical,
+          x:
+            canvasWidth -
+            evenVerticalShreddedImg.strips.length *
+              evenVerticalShreddedImg.stripSize,
+          y: oddHorizontalShreddedImgForEvenVertical.stripSize,
+          spread: 2,
+          alpha: 1,
+        },
+        {
+          ref: evenHorizontalShreddedImgForOddVertical,
+          x: 0,
+          y: canvasHeight - oddVerticalShreddedImg.img.height,
+          spread: 2,
+          alpha: 1,
+        },
+        {
+          ref: oddHorizontalShreddedImgForOddVertical,
+          x:
+            canvasWidth -
+            oddVerticalShreddedImg.strips.length *
+              oddVerticalShreddedImg.stripSize,
+          y:
+            canvasHeight -
+            oddVerticalShreddedImg.img.height +
+            oddHorizontalShreddedImgForOddVertical.stripSize,
+          spread: 2,
+          alpha: 1,
+        },
+      ])
+
+      this.#repeatKeyframe(
+        [
+          {
+            ref: evenVerticalShreddedImg,
+            x: 0,
+            y: 0,
+            spread: 1,
+            alpha: 0,
+          },
+          {
+            ref: oddVerticalShreddedImg,
+            x: 0,
+            y: canvasHeight - oddVerticalShreddedImg.img.height,
+            spread: 1,
+            alpha: 0,
+          },
+          {
+            ref: evenHorizontalShreddedImgForEvenVertical,
+            x: 0,
+            y: 0,
+            spread: 1,
+            alpha: 1,
+          },
+          {
+            ref: oddHorizontalShreddedImgForEvenVertical,
+            x:
+              canvasWidth -
+              evenVerticalShreddedImg.strips.length *
+                evenVerticalShreddedImg.stripSize,
+            y: oddHorizontalShreddedImgForEvenVertical.stripSize,
+            spread: 1,
+            alpha: 1,
+          },
+          {
+            ref: evenHorizontalShreddedImgForOddVertical,
+            x: 0,
+            y: canvasHeight - oddVerticalShreddedImg.img.height,
+            spread: 1,
+            alpha: 1,
+          },
+          {
+            ref: oddHorizontalShreddedImgForOddVertical,
+            x:
+              canvasWidth -
+              oddVerticalShreddedImg.strips.length *
+                oddVerticalShreddedImg.stripSize,
+            y:
+              canvasHeight -
+              oddVerticalShreddedImg.img.height +
+              oddHorizontalShreddedImgForOddVertical.stripSize,
+            spread: 1,
+            alpha: 1,
+          },
+        ],
+        2,
+      )
+
+      this.add([
+        {
+          ref: evenVerticalShreddedImg,
+          x: 0,
+          y: 0,
+          spread: 1,
+          alpha: 0,
+        },
+        {
+          ref: oddVerticalShreddedImg,
+          x: 0,
+          y: canvasHeight - oddVerticalShreddedImg.img.height,
+          spread: 1,
+          alpha: 0,
+        },
+        {
+          ref: evenHorizontalShreddedImgForEvenVertical,
+          x: 0,
+          y: 0,
+          spread: 2,
+          alpha: 1,
+        },
+        {
+          ref: oddHorizontalShreddedImgForEvenVertical,
+          x: 0,
+          y: oddHorizontalShreddedImgForEvenVertical.stripSize,
+          spread: 2,
+          alpha: 1,
+        },
+        {
+          ref: evenHorizontalShreddedImgForOddVertical,
+          x: 0,
+          y: canvasHeight - oddVerticalShreddedImg.img.height,
+          spread: 2,
+          alpha: 1,
+        },
+        {
+          ref: oddHorizontalShreddedImgForOddVertical,
+          x: 0,
+          y:
+            canvasHeight -
+            oddVerticalShreddedImg.img.height +
+            oddHorizontalShreddedImgForOddVertical.stripSize,
+          spread: 2,
+          alpha: 1,
+        },
+      ])
+
+      this.add([
+        {
+          ref: evenVerticalShreddedImg,
+          x: 0,
+          y: 0,
+          spread: 1,
+          alpha: 1,
+        },
+        {
+          ref: oddVerticalShreddedImg,
+          x: 0,
+          y: canvasHeight - oddVerticalShreddedImg.img.height,
+          spread: 1,
+          alpha: 1,
+        },
+        {
+          ref: evenHorizontalShreddedImgForEvenVertical,
+          x: 0,
+          y: 0,
+          spread: 2,
+          alpha: 1,
+        },
+        {
+          ref: oddHorizontalShreddedImgForEvenVertical,
+          x: 0,
+          y: oddHorizontalShreddedImgForEvenVertical.stripSize,
+          spread: 2,
+          alpha: 1,
+        },
+        {
+          ref: evenHorizontalShreddedImgForOddVertical,
+          x: 0,
+          y: canvasHeight - oddVerticalShreddedImg.img.height,
+          spread: 2,
+          alpha: 1,
+        },
+        {
+          ref: oddHorizontalShreddedImgForOddVertical,
+          x: 0,
+          y:
+            canvasHeight -
+            oddVerticalShreddedImg.img.height +
+            oddHorizontalShreddedImgForOddVertical.stripSize,
+          spread: 2,
+          alpha: 1,
+        },
+      ])
+
+      this.add([
+        {
+          ref: evenVerticalShreddedImg,
+          x: 0,
+          y: 0,
+          spread: 1,
+          alpha: 1,
+        },
+        {
+          ref: oddVerticalShreddedImg,
+          x: 0,
+          y: canvasHeight - oddVerticalShreddedImg.img.height,
+          spread: 1,
+          alpha: 1,
+        },
+        {
+          ref: evenHorizontalShreddedImgForEvenVertical,
+          x: 0,
+          y: 0,
+          spread: 2,
+          alpha: 0,
+        },
+        {
+          ref: oddHorizontalShreddedImgForEvenVertical,
+          x: 0,
+          y: oddHorizontalShreddedImgForEvenVertical.stripSize,
+          spread: 2,
+          alpha: 0,
+        },
+        {
+          ref: evenHorizontalShreddedImgForOddVertical,
+          x: 0,
+          y: canvasHeight - oddVerticalShreddedImg.img.height,
+          spread: 2,
+          alpha: 0,
+        },
+        {
+          ref: oddHorizontalShreddedImgForOddVertical,
+          x: 0,
+          y:
+            canvasHeight -
+            oddVerticalShreddedImg.img.height +
+            oddHorizontalShreddedImgForOddVertical.stripSize,
+          spread: 2,
+          alpha: 0,
+        },
+      ])
+    }
   }
 
   /**
@@ -83,10 +543,7 @@ export default class ShreddedImgAnimationManager extends AnimationManager {
    * @param   {number} times
    * @returns {void}
    */
-  #repeatKeyframe(
-    keyframe: Keyframe<AbstractShreddedImg>,
-    times: number,
-  ): void {
+  #repeatKeyframe(keyframe: ShreddedImageKeyframe, times: number): void {
     for (let i = 0; i < times; i++) {
       this.add(keyframe)
     }

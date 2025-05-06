@@ -6,11 +6,21 @@ import AbstractShreddedImg from './abstract-shredded-img.ts'
 import HorizontalShreddedImg from './horizontal-shredded-img.ts'
 import VerticalShreddedImg from './vertical-shredded-img.ts'
 
+/**
+ * @const {string}
+ */
+const ID_EVEN_SUFFIX = '_even'
+
+/**
+ * @const {string}
+ */
+const ID_ODD_SUFFIX = '_odd'
+
 export default class ShreddedImgManager {
   /**
-   * @type {AbstractShreddedImg[]}
+   * @type {{[id: string]: AbstractShreddedImg}}
    */
-  shreddedImgs: AbstractShreddedImg[] = []
+  shreddedImgs: {[id: string]: AbstractShreddedImg}
 
   /**
    * @type {number}
@@ -18,19 +28,12 @@ export default class ShreddedImgManager {
   stripSize: number
 
   /**
-   * @type {number}
-   */
-  spread: number
-
-  /**
    * Constructor
    *
    * @param {number} stripSize
-   * @param {number} spread
    */
-  constructor(stripSize: number = 5, spread: number = 2) {
+  constructor(stripSize: number = 5) {
     this.stripSize = stripSize
-    this.spread = spread
   }
 
   /**
@@ -39,9 +42,13 @@ export default class ShreddedImgManager {
    * @returns {boolean}
    */
   isReady(): boolean {
-    return this.shreddedImgs.every(
-      (shreddedImg) => shreddedImg.imgElement.complete,
-    )
+    for (const id in this.shreddedImgs) {
+      const shreddedImg = this.shreddedImgs[id]
+      if (!shreddedImg.imgElement.complete) {
+        return false
+      }
+    }
+    return true
   }
 
   /**
@@ -51,7 +58,8 @@ export default class ShreddedImgManager {
    * @returns {void}
    */
   draw(context: CanvasRenderingContext2D): void {
-    for (const shreddedImg of this.shreddedImgs) {
+    for (const id in this.shreddedImgs) {
+      const shreddedImg = this.shreddedImgs[id]
       shreddedImg.draw(context)
     }
   }
@@ -60,13 +68,15 @@ export default class ShreddedImgManager {
    * Duplicate given shredded image
    *
    * @param   {AbstractShreddedImg} shreddedImg
+   * @param   {string}              id
    * @param   {boolean}             isHorizontalCreation
-   * @returns {AbstractShreddedImg[]}
+   * @returns {void}
    */
   duplicateShreddedImg(
     shreddedImg: AbstractShreddedImg,
+    id: string,
     isHorizontalCreation: boolean,
-  ): AbstractShreddedImg[] {
+  ): void {
     /**
      * @note It is persisted image strips in a canvas and then
      *       is generated shredded image from this canvas
@@ -89,49 +99,50 @@ export default class ShreddedImgManager {
       shreddedImg.draw(context)
       shreddedImg.spread = oldSpread
 
-      return this.createShreddedImgs(
+      this.createShreddedImgs(
         canvas.toDataURL('image/png'),
         canvas.width,
+        id,
         isHorizontalCreation,
       )
     }
-
-    return []
   }
 
   /**
    * Create shredded images.
-   * It is created the even and the odd ones,
-   * and they are reassembled
-   * (it is offset the `x`/`y` coordinate of the odd ones)
-   * to build the original image
+   * It is created the even and the odd ones
    *
    * @param   {string}  src
    * @param   {number}  width
+   * @param   {string}  id
    * @param   {boolean} isHorizontalCreation
-   * @returns {AbstractShreddedImg[]}
+   * @returns {void}
    */
   createShreddedImgs(
     src: string,
     width: number,
+    id: string,
     isHorizontalCreation: boolean = true,
-  ): AbstractShreddedImg[] {
+  ): void {
     let evenShreddedImg
     let oddShreddedImg
 
     if (isHorizontalCreation) {
       evenShreddedImg = this.#createHorizontalShreddedImg(src, width, true)
       oddShreddedImg = this.#createHorizontalShreddedImg(src, width, false)
-      oddShreddedImg.y += oddShreddedImg.stripSize
     } else {
       evenShreddedImg = this.#createVerticalShreddedImg(src, width, true)
       oddShreddedImg = this.#createVerticalShreddedImg(src, width, false)
-      oddShreddedImg.x += oddShreddedImg.stripSize
     }
 
-    this.shreddedImgs.push(evenShreddedImg)
-    this.shreddedImgs.push(oddShreddedImg)
-    return [evenShreddedImg, oddShreddedImg]
+    this.shreddedImgs = {
+      [id + ID_EVEN_SUFFIX]: evenShreddedImg,
+      ...this.shreddedImgs,
+    }
+    this.shreddedImgs = {
+      [id + ID_ODD_SUFFIX]: oddShreddedImg,
+      ...this.shreddedImgs,
+    }
   }
 
   /**
@@ -140,26 +151,14 @@ export default class ShreddedImgManager {
    * @param   {string}  src
    * @param   {number}  width
    * @param   {boolean} isEven
-   * @param   {number}  x
-   * @param   {number}  y
    * @returns {HorizontalShreddedImg}
    */
   #createHorizontalShreddedImg(
     src: string,
     width: number,
     isEven: boolean = true,
-    x: number = 0,
-    y: number = 0,
   ): HorizontalShreddedImg {
-    return new HorizontalShreddedImg(
-      src,
-      width,
-      this.stripSize,
-      this.spread,
-      x,
-      y,
-      isEven,
-    )
+    return new HorizontalShreddedImg(src, width, this.stripSize, isEven)
   }
 
   /**
@@ -168,25 +167,13 @@ export default class ShreddedImgManager {
    * @param   {string}  src
    * @param   {number}  width
    * @param   {boolean} isEven
-   * @param   {number}  x
-   * @param   {number}  y
    * @returns {VerticalShreddedImg}
    */
   #createVerticalShreddedImg(
     src: string,
     width: number,
     isEven: boolean = true,
-    x: number = 0,
-    y: number = 0,
   ): VerticalShreddedImg {
-    return new VerticalShreddedImg(
-      src,
-      width,
-      this.stripSize,
-      this.spread,
-      x,
-      y,
-      isEven,
-    )
+    return new VerticalShreddedImg(src, width, this.stripSize, isEven)
   }
 }

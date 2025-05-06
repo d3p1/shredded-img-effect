@@ -40,6 +40,11 @@ export default abstract class AbstractShreddedImg implements ShreddedImage {
   y: number
 
   /**
+   * @type {number}
+   */
+  alpha: number
+
+  /**
    * @type {HTMLImageElement}
    * @note Original image element converted into a canvas element to process it
    * @see  _initImg()
@@ -52,24 +57,27 @@ export default abstract class AbstractShreddedImg implements ShreddedImage {
    * @param {string}  src
    * @param {number}  width
    * @param {number}  stripSize
+   * @param {boolean} isEven
    * @param {number}  spread
    * @param {number}  x
    * @param {number}  y
-   * @param {boolean} isEven
+   * @param {number}  alpha
    */
   constructor(
     src: string,
     width: number,
     stripSize: number,
-    spread: number,
+    isEven: boolean = true,
+    spread: number = 2,
     x: number = 0,
     y: number = 0,
-    isEven: boolean = true,
+    alpha: number = 1,
   ) {
-    this.spread = spread
     this.stripSize = stripSize
+    this.spread = spread
     this.x = x
     this.y = y
+    this.alpha = alpha
 
     /**
      * @note After image is loaded, we are ready to generate
@@ -91,10 +99,13 @@ export default abstract class AbstractShreddedImg implements ShreddedImage {
    */
   draw(context: CanvasRenderingContext2D): void {
     if (this.strips) {
+      context.save()
+      context.globalAlpha = this.alpha
       for (let i = 0; i < this.strips.length; i++) {
         const strip = this.strips[i]
         this._drawStrip(context, strip, i)
       }
+      context.restore()
     }
   }
 

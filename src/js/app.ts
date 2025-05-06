@@ -1,7 +1,10 @@
 /**
  * @description App
  * @author      C. M. de Picciotto <d3p1@d3p1.dev> (https://d3p1.dev/)
+ * @todo        Improve shredded image manager and how shredded images are
+ *              accessed
  */
+import HorizontalShreddedImg from './app/core/horizontal-shredded-img.ts'
 import VerticalShreddedImg from './app/core/vertical-shredded-img.ts'
 import AnimationManager from './app/animator/shredded-img-animation-manager.ts'
 import ShreddedImgManager from './app/core/shredded-img-manager.ts'
@@ -35,7 +38,7 @@ class App {
     this.#initCanvas()
     this.#initAnimationManager()
     this.#initShreddedImgManager()
-    this.#initImageAnimations()
+    this.#initShreddedImgs()
 
     this.#animate()
   }
@@ -60,8 +63,39 @@ class App {
    */
   #update(t: number): void {
     if (this.#shreddedImgManager.isReady()) {
-      this.#animationManager.update(t)
-      this.#shreddedImgManager.draw(this.#context)
+      if (!this.#animationManager.keyframes.length) {
+        /**
+         * @note Create animations when images are ready
+         */
+        this.#animationManager.animateShreddedImgs(
+          this.#shreddedImgManager.shreddedImgs[
+            'vertical_even'
+          ] as VerticalShreddedImg,
+          this.#shreddedImgManager.shreddedImgs[
+            'vertical_odd'
+          ] as VerticalShreddedImg,
+          this.#shreddedImgManager.shreddedImgs[
+            'vertical_even_horizontal_even'
+          ] as HorizontalShreddedImg,
+          this.#shreddedImgManager.shreddedImgs[
+            'vertical_even_horizontal_odd'
+          ] as HorizontalShreddedImg,
+          this.#shreddedImgManager.shreddedImgs[
+            'vertical_odd_horizontal_even'
+          ] as HorizontalShreddedImg,
+          this.#shreddedImgManager.shreddedImgs[
+            'vertical_odd_horizontal_odd'
+          ] as HorizontalShreddedImg,
+          this.#canvas.width,
+          this.#canvas.height,
+        )
+      } else {
+        /**
+         * @note Update shredded images based on animations
+         */
+        this.#animationManager.update(t)
+        this.#shreddedImgManager.draw(this.#context)
+      }
     }
   }
 
@@ -75,76 +109,60 @@ class App {
   }
 
   /**
-   * Init image animations
+   * Init shredded images
    *
    * @returns {void}
    */
-  #initImageAnimations(): void {
-    const [evenVerticalShreddedImg, oddVerticalShreddedImg] =
-      this.#initVerticalImageAnimations()
+  #initShreddedImgs(): void {
+    this.#initVerticalShreddedImgs()
 
-    this.#initHorizontalImageAnimations([
-      evenVerticalShreddedImg,
-      oddVerticalShreddedImg,
-    ])
-  }
-
-  /**
-   * Init vertical image animations
-   *
-   * @returns {VerticalShreddedImg[]}
-   */
-  #initVerticalImageAnimations(): VerticalShreddedImg[] {
-    const [evenVerticalShreddedImg, oddVerticalShreddedImg] =
-      this.#shreddedImgManager.createShreddedImgs(
-        cheetahImg,
-        this.#canvas.width * 0.2,
-        false,
-      )
-
-    this.#animationManager.addKeyframes(
-      evenVerticalShreddedImg,
-      oddVerticalShreddedImg,
-      0,
-      this.#canvas.height * 0.5,
+    this.#initHorizontalShreddedImg(
+      this.#shreddedImgManager.shreddedImgs['vertical_even'],
+      'vertical_even_horizontal',
     )
 
-    return [evenVerticalShreddedImg, oddVerticalShreddedImg]
+    this.#initHorizontalShreddedImg(
+      this.#shreddedImgManager.shreddedImgs['vertical_odd'],
+      'vertical_odd_horizontal',
+    )
   }
 
   /**
-   * Init horizontal image animations
+   * Init vertical shredded images
    *
-   * @param   {VerticalShreddedImg[]} shreddedImgs
    * @returns {void}
    */
-  #initHorizontalImageAnimations(shreddedImgs: VerticalShreddedImg[]): void {
+  #initVerticalShreddedImgs(): void {
+    this.#shreddedImgManager.createShreddedImgs(
+      cheetahImg,
+      this.#canvas.width * 0.2,
+      'vertical',
+      false,
+    )
+  }
+
+  /**
+   * Init horizontal shredded images from vertical shredded image
+   *
+   * @param   {VerticalShreddedImg} shreddedImg
+   * @param   {string}              id
+   * @returns {void}
+   */
+  #initHorizontalShreddedImg(
+    shreddedImg: VerticalShreddedImg,
+    id: string,
+  ): void {
     /**
-     * @note For each vertical shredded image is generated
-     *       a horizontal version
+     * @note It is updated the `onload` event of the shredded image
+     *       to generate a horizontal version when image is already loaded
      */
-    for (let i = 0; i < shreddedImgs.length; i++) {
-      /**
-       * @note It is updated the `onload` event of the shredded image
-       *       to generate a horizontal version when image is already loaded
-       */
-      const shreddedImg = shreddedImgs[i]
-      const onload = shreddedImg.imgElement.onload
-      shreddedImg.imgElement.onload = (e) => {
-        if (onload) {
-          onload.call(shreddedImg.imgElement, e)
-        }
-
-        const [evenHorizontalShreddedImg, oddHorizontalShreddedImg] =
-          this.#shreddedImgManager.duplicateShreddedImg(shreddedImg, true)
-
-        this.#animationManager.addKeyframes(
-          evenHorizontalShreddedImg,
-          oddHorizontalShreddedImg,
-          this.#canvas.width * 0.5,
-          0,
-        )
+    const onload = shreddedImg.imgElement.onload
+    shreddedImg.imgElement.onload = (e) => {
+      if (onload) {
+        onload.call(shreddedImg.imgElement, e)
       }
+
+      this.#shreddedImgManager.duplicateShreddedImg(shreddedImg, id, true)
     }
   }
 
