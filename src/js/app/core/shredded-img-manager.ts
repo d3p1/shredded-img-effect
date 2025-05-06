@@ -13,19 +13,9 @@ export default class ShreddedImgManager {
   shreddedImgs: AbstractShreddedImg[] = []
 
   /**
-   * @type {HTMLImageElement}
-   */
-  img: HTMLImageElement
-
-  /**
    * @type {number}
    */
-  width: number
-
-  /**
-   * @type {number}
-   */
-  height: number
+  stripSize: number
 
   /**
    * @type {number}
@@ -40,20 +30,12 @@ export default class ShreddedImgManager {
   /**
    * Constructor
    *
-   * @param {string} src
-   * @param {number} width
+   * @param {number} stripSize
    * @param {number} spread
    */
-  constructor(src: string, width: number, spread: number = 2) {
-    this.img = new Image()
-    this.img.src = src
+  constructor(stripSize: number = 5, spread: number = 2) {
+    this.stripSize = stripSize
     this.spread = spread
-    this.width = width
-
-    this.img.onload = () => {
-      const ar = this.img.width / this.img.height
-      this.height = width / ar
-    }
   }
 
   /**
@@ -71,37 +53,25 @@ export default class ShreddedImgManager {
   /**
    * Create shredded images. It is created the even and the odd ones
    *
-   * @param   {number} x
-   * @param   {number} y
+   * @param   {string} src
+   * @param   {number} width
    * @returns {AbstractShreddedImg[]}
    * @note    It is toggle a flag to check if it is
    *          the horizontal version turn or vertical version turn
    */
-  createShreddedImgs(x: number, y: number): AbstractShreddedImg[] {
+  createShreddedImgs(src: string, width: number): AbstractShreddedImg[] {
     let evenShreddedImg
     let oddShreddedImg
 
     this.isHorizontalCreation = !this.isHorizontalCreation
     if (this.isHorizontalCreation) {
-      const stripSize = Math.ceil(this.height * 0.01)
-
-      evenShreddedImg = this.#createHorizontalShreddedImg(true, stripSize, x, y)
-      oddShreddedImg = this.#createHorizontalShreddedImg(
-        false,
-        stripSize,
-        x,
-        y + stripSize,
-      )
+      evenShreddedImg = this.#createHorizontalShreddedImg(src, width, true)
+      oddShreddedImg = this.#createHorizontalShreddedImg(src, width, false)
+      oddShreddedImg.y += oddShreddedImg.stripSize
     } else {
-      const stripSize = Math.ceil(this.width * 0.01)
-
-      evenShreddedImg = this.#createVerticalShreddedImg(true, stripSize, x, y)
-      oddShreddedImg = this.#createVerticalShreddedImg(
-        false,
-        stripSize,
-        x + stripSize,
-        y,
-      )
+      evenShreddedImg = this.#createVerticalShreddedImg(src, width, true)
+      oddShreddedImg = this.#createVerticalShreddedImg(src, width, false)
+      oddShreddedImg.x += oddShreddedImg.stripSize
     }
 
     this.shreddedImgs.push(evenShreddedImg)
@@ -112,23 +82,24 @@ export default class ShreddedImgManager {
   /**
    * Create horizontal shredded image
    *
+   * @param   {string}  src
+   * @param   {number}  width
    * @param   {boolean} isEven
-   * @param   {number}  stripSize
    * @param   {number}  x
    * @param   {number}  y
    * @returns {HorizontalShreddedImg}
    */
   #createHorizontalShreddedImg(
+    src: string,
+    width: number,
     isEven: boolean = true,
-    stripSize: number,
     x: number = 0,
     y: number = 0,
   ): HorizontalShreddedImg {
     return new HorizontalShreddedImg(
-      this.img,
-      this.width,
-      this.height,
-      stripSize,
+      src,
+      width,
+      this.stripSize,
       this.spread,
       x,
       y,
@@ -139,23 +110,24 @@ export default class ShreddedImgManager {
   /**
    * Create vertical shredded image
    *
+   * @param   {string}  src
+   * @param   {number}  width
    * @param   {boolean} isEven
-   * @param   {number}  stripSize
    * @param   {number}  x
    * @param   {number}  y
    * @returns {VerticalShreddedImg}
    */
   #createVerticalShreddedImg(
+    src: string,
+    width: number,
     isEven: boolean = true,
-    stripSize: number,
     x: number = 0,
     y: number = 0,
   ): VerticalShreddedImg {
     return new VerticalShreddedImg(
-      this.img,
-      this.width,
-      this.height,
-      stripSize,
+      src,
+      width,
+      this.stripSize,
       this.spread,
       x,
       y,

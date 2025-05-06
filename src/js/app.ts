@@ -6,15 +6,6 @@ import AnimationManager from './app/animator/shredded-img-animation-manager.ts'
 import ShreddedImgManager from './app/core/shredded-img-manager.ts'
 import cheetahImg from '../media/images/cheetah.png'
 
-/**
- * @const {number}
- * @note  For each image we have five animation frames:
- *        Two to define its initial state,
- *        One to separate them,
- *        Two to define its final state where each strip is joined
- */
-const MAX_ANIMATION_KEYFRAMES = 5
-
 class App {
   /**
    * @type {ShreddedImgManager}
@@ -43,6 +34,7 @@ class App {
     this.#initCanvas()
     this.#initAnimationManager()
     this.#initShreddedImgManager()
+    this.#initImageAnimations()
 
     this.#animate()
   }
@@ -54,13 +46,11 @@ class App {
    * @returns {void}
    */
   #animate(t: number = 0): void {
-    if (this.#shreddedImgManager.img.complete) {
-      this.#clear()
-      this.#processAnimations(t)
-      this.#draw()
-    }
+    this.#clear()
+    this.#processAnimations(t)
+    this.#draw()
 
-    requestAnimationFrame(this.#animate.bind(this))
+    requestAnimationFrame((t) => this.#animate(t))
   }
 
   /**
@@ -68,53 +58,10 @@ class App {
    *
    * @param   {number} t
    * @returns {void}
-   * @todo    For now, we are limiting the number of keyframes
-   *          to generate animation just for the vertical strips
-   *          and the horizontal ones.
-   *          Adapt logic so it is possible to generate more and more
-   *          animated and shredded images,
-   *          until there is no more space in canvas
    */
   #processAnimations(t: number): void {
-    /**
-     * @note Every time animation cycle will finish,
-     *       it is added a new animation cycle
-     */
-    if (
-      this.#animationManager.nextKeyframeIndex === 0 &&
-      this.#animationManager.keyframes.length < MAX_ANIMATION_KEYFRAMES
-    ) {
-      this.#addImageAnimations()
-    }
-
     if (this.#animationManager.keyframes.length) {
       this.#animationManager.play(t)
-    }
-  }
-
-  /**
-   * Add shredded image animations
-   *
-   * @returns {void}
-   */
-  #addImageAnimations(): void {
-    const [evenShreddedImg, oddShreddedImg] =
-      this.#shreddedImgManager.createShreddedImgs(0, 0)
-
-    if (this.#shreddedImgManager.isHorizontalCreation) {
-      this.#animationManager.addKeyframes(
-        evenShreddedImg,
-        oddShreddedImg,
-        this.#canvas.width - this.#shreddedImgManager.width,
-        0,
-      )
-    } else {
-      this.#animationManager.addKeyframes(
-        evenShreddedImg,
-        oddShreddedImg,
-        0,
-        this.#canvas.height - this.#shreddedImgManager.height,
-      )
     }
   }
 
@@ -137,15 +84,41 @@ class App {
   }
 
   /**
+   * Init image animations
+   *
+   * @returns {void}
+   */
+  #initImageAnimations(): void {
+    const [evenShreddedImg, oddShreddedImg] =
+      this.#shreddedImgManager.createShreddedImgs(
+        cheetahImg,
+        this.#canvas.width * 0.2,
+      )
+
+    if (this.#shreddedImgManager.isHorizontalCreation) {
+      this.#animationManager.addKeyframes(
+        evenShreddedImg,
+        oddShreddedImg,
+        this.#canvas.width * 0.5,
+        0,
+      )
+    } else {
+      this.#animationManager.addKeyframes(
+        evenShreddedImg,
+        oddShreddedImg,
+        0,
+        this.#canvas.height * 0.5,
+      )
+    }
+  }
+
+  /**
    * Init shredded image manager
    *
    * @returns {void}
    */
   #initShreddedImgManager(): void {
-    this.#shreddedImgManager = new ShreddedImgManager(
-      cheetahImg,
-      this.#canvas.width * 0.2,
-    )
+    this.#shreddedImgManager = new ShreddedImgManager()
   }
 
   /**

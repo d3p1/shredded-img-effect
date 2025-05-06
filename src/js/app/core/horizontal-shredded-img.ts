@@ -35,22 +35,27 @@ export default class HorizontalShreddedImg extends AbstractShreddedImg {
    * @note By default, images are being processed as vertical stripped images.
    *       We are going to flip the image so horizontal stripes are being
    *       generated as vertical stripes
+   * @todo Share custom logic between this customization and parent class
+   *       instead of rewrite all the method
    */
-  protected _initImg(
-    img: HTMLImageElement,
-    width: number,
-    height: number,
-  ): void {
-    super._initImg(img, width, height)
+  protected _initImg(src: string, width: number, isEven: boolean): void {
+    const img = new Image()
+    img.src = src
 
-    if (this._img) {
-      this._img.width = height
-      this._img.height = width
-      const context = this._img.getContext('2d') as CanvasRenderingContext2D
+    img.onload = () => {
+      const ar = img.width / img.height
+      const height = width / ar
+
+      this.img = document.createElement('canvas')
+      this.img.width = height
+      this.img.height = width
+      const context = this.img.getContext('2d') as CanvasRenderingContext2D
       context.save()
       context.rotate(-Math.PI / 2)
       context.drawImage(img, 0, 0, -width, height)
       context.restore()
+
+      this._initStrips(isEven)
     }
   }
 }

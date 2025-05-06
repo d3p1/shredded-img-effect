@@ -6,6 +6,16 @@ import {ShreddedImage} from '../../types'
 
 export default abstract class AbstractShreddedImg implements ShreddedImage {
   /**
+   * @type {HTMLCanvasElement | null}
+   */
+  img: HTMLCanvasElement | null
+
+  /**
+   * @type {HTMLCanvasElement[]}
+   */
+  strips: HTMLCanvasElement[] | null
+
+  /**
    * @type {number}
    */
   stripSize: number
@@ -26,44 +36,31 @@ export default abstract class AbstractShreddedImg implements ShreddedImage {
   y: number
 
   /**
-   * @type {HTMLCanvasElement | null}
-   */
-  protected _img: HTMLCanvasElement | null
-
-  /**
-   * @type {HTMLCanvasElement[]}
-   */
-  protected _strips: HTMLCanvasElement[] | null
-
-  /**
    * Constructor
    *
-   * @param {HTMLImageElement} img
-   * @param {number}           width
-   * @param {number}           height
-   * @param {number}           stripSize
-   * @param {number}           spread
-   * @param {number}           x
-   * @param {number}           y
-   * @param {boolean}          isEven
+   * @param {string}  src
+   * @param {number}  width
+   * @param {number}  stripSize
+   * @param {number}  spread
+   * @param {number}  x
+   * @param {number}  y
+   * @param {boolean} isEven
    */
   constructor(
-    img: HTMLImageElement,
+    src: string,
     width: number,
-    height: number,
     stripSize: number,
     spread: number,
-    x: number,
-    y: number,
+    x: number = 0,
+    y: number = 0,
     isEven: boolean = true,
   ) {
-    this.stripSize = stripSize
     this.spread = spread
+    this.stripSize = stripSize
     this.x = x
     this.y = y
 
-    this._initImg(img, width, height)
-    this._initStrips(isEven)
+    this._initImg(src, width, isEven)
   }
 
   /**
@@ -73,9 +70,9 @@ export default abstract class AbstractShreddedImg implements ShreddedImage {
    * @returns {void}
    */
   draw(context: CanvasRenderingContext2D): void {
-    if (this._strips) {
-      for (let i = 0; i < this._strips.length; i++) {
-        const strip = this._strips[i]
+    if (this.strips) {
+      for (let i = 0; i < this.strips.length; i++) {
+        const strip = this.strips[i]
         this._drawStrip(context, strip, i)
       }
     }
@@ -99,6 +96,33 @@ export default abstract class AbstractShreddedImg implements ShreddedImage {
   }
 
   /**
+   * Init image
+   *
+   * @param   {string}  src
+   * @param   {number}  width
+   * @param   {boolean} isEven
+   * @returns {void}
+   * @note    Image is persisted in a canvas to be able to process it
+   */
+  protected _initImg(src: string, width: number, isEven: boolean): void {
+    const img = new Image()
+    img.src = src
+
+    img.onload = () => {
+      const ar = img.width / img.height
+      const height = width / ar
+
+      this.img = document.createElement('canvas')
+      this.img.width = width
+      this.img.height = height
+      const context = this.img.getContext('2d') as CanvasRenderingContext2D
+      context.drawImage(img, 0, 0, width, height)
+
+      this._initStrips(isEven)
+    }
+  }
+
+  /**
    * Init strips
    *
    * @param   {boolean} isEven
@@ -106,16 +130,16 @@ export default abstract class AbstractShreddedImg implements ShreddedImage {
    * @note    By default, strips are being generated as vertical strips
    */
   protected _initStrips(isEven: boolean = true): void {
-    this._strips = []
-    if (this._img) {
-      for (let x = 0; x < this._img.width; x += this.stripSize) {
+    this.strips = []
+    if (this.img) {
+      for (let x = 0; x < this.img.width; x += this.stripSize) {
         if (
           (isEven && (x / this.stripSize) % 2 === 0) ||
           (!isEven && (x / this.stripSize) % 2 !== 0)
         ) {
           const strip = this._initStrip(x)
           if (strip) {
-            this._strips.push(strip)
+            this.strips.push(strip)
           }
         }
       }
@@ -129,14 +153,14 @@ export default abstract class AbstractShreddedImg implements ShreddedImage {
    * @returns {HTMLCanvasElement | null}
    */
   protected _initStrip(x: number): HTMLCanvasElement | null {
-    if (this._img) {
+    if (this.img) {
       const strip = document.createElement('canvas')
       strip.width = this.stripSize
-      strip.height = this._img.height
+      strip.height = this.img.height
 
       const stripContext = strip.getContext('2d') as CanvasRenderingContext2D
       stripContext.drawImage(
-        this._img,
+        this.img,
         x,
         0,
         strip.width,
@@ -151,26 +175,5 @@ export default abstract class AbstractShreddedImg implements ShreddedImage {
     }
 
     return null
-  }
-
-  /**
-   * Init image
-   *
-   * @param   {HTMLImageElement} img
-   * @param   {number}           width
-   * @param   {number}           height
-   * @returns {void}
-   * @note    Image is persisted in a canvas to be able to process it
-   */
-  protected _initImg(
-    img: HTMLImageElement,
-    width: number,
-    height: number,
-  ): void {
-    this._img = document.createElement('canvas')
-    this._img.width = width
-    this._img.height = height
-    const context = this._img.getContext('2d') as CanvasRenderingContext2D
-    context.drawImage(img, 0, 0, width, height)
   }
 }
