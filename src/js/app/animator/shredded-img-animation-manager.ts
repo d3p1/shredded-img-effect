@@ -307,7 +307,7 @@ export default class ShreddedImgAnimationManager extends AnimationManager {
             canvasWidth -
             evenVerticalShreddedImg.strips.length *
               evenVerticalShreddedImg.stripSize,
-          y: oddHorizontalShreddedImgForEvenVertical.stripSize,
+          y: 0,
           spread: 2,
           alpha: 1,
         },
@@ -324,10 +324,7 @@ export default class ShreddedImgAnimationManager extends AnimationManager {
             canvasWidth -
             oddVerticalShreddedImg.strips.length *
               oddVerticalShreddedImg.stripSize,
-          y:
-            canvasHeight -
-            oddVerticalShreddedImg.img.height +
-            oddHorizontalShreddedImgForOddVertical.stripSize,
+          y: canvasHeight - oddVerticalShreddedImg.img.height,
           spread: 2,
           alpha: 1,
         },
@@ -362,7 +359,7 @@ export default class ShreddedImgAnimationManager extends AnimationManager {
               canvasWidth -
               evenVerticalShreddedImg.strips.length *
                 evenVerticalShreddedImg.stripSize,
-            y: oddHorizontalShreddedImgForEvenVertical.stripSize,
+            y: 0,
             spread: 1,
             alpha: 1,
           },
@@ -379,10 +376,7 @@ export default class ShreddedImgAnimationManager extends AnimationManager {
               canvasWidth -
               oddVerticalShreddedImg.strips.length *
                 oddVerticalShreddedImg.stripSize,
-            y:
-              canvasHeight -
-              oddVerticalShreddedImg.img.height +
-              oddHorizontalShreddedImgForOddVertical.stripSize,
+            y: canvasHeight - oddVerticalShreddedImg.img.height,
             spread: 1,
             alpha: 1,
           },
