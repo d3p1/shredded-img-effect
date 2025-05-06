@@ -36,8 +36,8 @@ export default class HorizontalShreddedImg extends AbstractShreddedImg {
    *       We are going to flip the image so horizontal strips are being
    *       generated as vertical strips
    */
-  protected _initImg(img: HTMLImageElement, width: number): void {
-    super._initImg(img, width)
+  protected _initImg(width: number): void {
+    super._initImg(width)
 
     if (this.img) {
       const w = this.img.width
@@ -48,7 +48,7 @@ export default class HorizontalShreddedImg extends AbstractShreddedImg {
       const context = this.img.getContext('2d') as CanvasRenderingContext2D
       context.save()
       context.rotate(-Math.PI / 2)
-      context.drawImage(this.img, 0, 0, -w, h)
+      context.drawImage(this.imgElement, 0, 0, -w, h)
       context.restore()
     }
   }

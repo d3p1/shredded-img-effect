@@ -40,6 +40,13 @@ export default abstract class AbstractShreddedImg implements ShreddedImage {
   y: number
 
   /**
+   * @type {HTMLImageElement}
+   * @note Original image element converted into a canvas element to process it
+   * @see  _initImg()
+   */
+  imgElement: HTMLImageElement
+
+  /**
    * Constructor
    *
    * @param {string}  src
@@ -68,10 +75,10 @@ export default abstract class AbstractShreddedImg implements ShreddedImage {
      * @note After image is loaded, we are ready to generate
      *       the canvas from image and the strips from this canvas
      */
-    const img = new Image()
-    img.src = src
-    img.onload = () => {
-      this._initImg(img, width)
+    this.imgElement = new Image()
+    this.imgElement.src = src
+    this.imgElement.onload = () => {
+      this._initImg(width)
       this._initStrips(isEven)
     }
   }
@@ -111,18 +118,17 @@ export default abstract class AbstractShreddedImg implements ShreddedImage {
   /**
    * Init image
    *
-   * @param   {HTMLImageElement} img
-   * @param   {number}           width
+   * @param   {number} width
    * @returns {void}
    */
-  protected _initImg(img: HTMLImageElement, width: number): void {
-    const ar = img.width / img.height
+  protected _initImg(width: number): void {
+    const ar = this.imgElement.width / this.imgElement.height
     const height = width / ar
     this.img = document.createElement('canvas')
     this.img.width = width
     this.img.height = height
     const context = this.img.getContext('2d') as CanvasRenderingContext2D
-    context.drawImage(img, 0, 0, width, height)
+    context.drawImage(this.imgElement, 0, 0, width, height)
   }
 
   /**
