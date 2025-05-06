@@ -1,6 +1,6 @@
 {
   "name": "@d3p1/shredded-img-effect",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "A shredded image effect to improve my JS skills",
   "private": true,
   "type": "module",

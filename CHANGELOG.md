@@ -1,3 +1,18 @@
+# [1.3.0](https://github.com/d3p1/shredded-img-effect/compare/v1.2.0...v1.3.0) (2025-05-06)
+
+
+### Bug Fixes
+
+* adjust shredded image dimensions [[#1](https://github.com/d3p1/shredded-img-effect/issues/1)] ([8f9268c](https://github.com/d3p1/shredded-img-effect/commit/8f9268caaa6b799313ea93ce8124028182517693))
+
+
+### Features
+
+* add duplicate shredded image method [[#1](https://github.com/d3p1/shredded-img-effect/issues/1)] ([cc480d0](https://github.com/d3p1/shredded-img-effect/commit/cc480d065d477c1d0c41e48e21fa0ef31046564e))
+* add image element property to shredded image implementation [[#1](https://github.com/d3p1/shredded-img-effect/issues/1)] ([793f300](https://github.com/d3p1/shredded-img-effect/commit/793f30014aa6f8f38e430f1fc61dcbf91406bb41))
+* add method to validate if all shredded images are loaded [[#1](https://github.com/d3p1/shredded-img-effect/issues/1)] ([68d6ca3](https://github.com/d3p1/shredded-img-effect/commit/68d6ca3cb35cb39245e9b2f7d98edbcc936c1556))
+* improve effect [[#1](https://github.com/d3p1/shredded-img-effect/issues/1)] ([0e70a80](https://github.com/d3p1/shredded-img-effect/commit/0e70a809b5e595a831473ba36b517994824fd6d9))
+
 # [1.2.0](https://github.com/d3p1/shredded-img-effect/compare/v1.1.0...v1.2.0) (2025-05-06)
 
 
