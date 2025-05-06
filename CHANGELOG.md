@@ -1,3 +1,10 @@
+## [1.4.1](https://github.com/d3p1/shredded-img-effect/compare/v1.4.0...v1.4.1) (2025-05-06)
+
+
+### Bug Fixes
+
+* improve final effect [[#1](https://github.com/d3p1/shredded-img-effect/issues/1)] ([8c0e7d5](https://github.com/d3p1/shredded-img-effect/commit/8c0e7d55f0b55737af6561ca682bb3f5939bbc28))
+
 # [1.4.0](https://github.com/d3p1/shredded-img-effect/compare/v1.3.0...v1.4.0) (2025-05-06)
 
 
